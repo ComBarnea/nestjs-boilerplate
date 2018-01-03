@@ -8,7 +8,18 @@ export interface IUser {
     readonly facebook: string;
     readonly tokens: AuthToken[];
 
-    readonly name: string;
+    readonly firstName: string;
+    readonly lastName: string;
     readonly gender: string;
     readonly profilePicture: string;
+}
+
+export interface ICreateUser {
+    email: string;
+    facebook?: string;
+    tokens?: AuthToken[];
+    firstName?: string;
+    lastName?: string;
+    gender?: string;
+    profilePicture?: string;
 }

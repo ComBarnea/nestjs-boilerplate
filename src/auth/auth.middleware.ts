@@ -1,11 +1,11 @@
 import { Middleware, NestMiddleware, HttpException, HttpStatus } from '@nestjs/common';
 import { NextFunction, Request } from 'express';
-
+import * as cors from 'cors';
 import * as jwt from 'jsonwebtoken';
 import { AuthService } from './auth.service';
 
 @Middleware()
-export class AuthMiddleware implements NestMiddleware {
+export class IsAuthenticated implements NestMiddleware {
     constructor(private authService: AuthService) {
 
     }
@@ -28,6 +28,20 @@ export class AuthMiddleware implements NestMiddleware {
             } else {
                 throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
             }
+        };
+    }
+}
+
+// TODO: change to facebook CORS
+@Middleware()
+export class AddFacebookCORS implements NestMiddleware {
+    resolve() {
+        return async (req: Request, res: Response, next: NextFunction) => {
+            return cors({
+                origin: '*',
+                withCredentials: false,
+                allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Content-Disposition']
+            })(req, res, next);
         };
     }
 }

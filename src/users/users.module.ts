@@ -1,9 +1,10 @@
 import { Module, NestModule, forwardRef, MiddlewaresConsumer, Component } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AuthMiddleware } from '../auth/auth.middleware';
+import { IsAuthenticated } from '../auth/auth.middleware';
 import { AuthModule } from '../auth/auth.module';
 import { UserSchema } from './schemas/user.schema';
 import { UsersController } from './users.controller';
+import {UsersService} from './users.service';
 
 @Module({
     imports: [
@@ -13,9 +14,9 @@ import { UsersController } from './users.controller';
         }]),
         forwardRef(() => AuthModule)
     ],
-    components: [],
+    components: [UsersService],
     controllers: [UsersController],
-    exports: [MongooseModule]
+    exports: [MongooseModule, UsersService]
 })
 export class UsersModule implements NestModule {
     constructor() {
@@ -23,6 +24,6 @@ export class UsersModule implements NestModule {
     }
 
     public configure(consumer: MiddlewaresConsumer) {
-        consumer.apply(AuthMiddleware).forRoutes(UsersController);
+        consumer.apply(IsAuthenticated).forRoutes(UsersController);
     }
 }

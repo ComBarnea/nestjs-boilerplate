@@ -1,6 +1,6 @@
-import { forwardRef, Module } from '@nestjs/common';
+import {forwardRef, MiddlewaresConsumer, Module, RequestMethod} from '@nestjs/common';
 import { UsersModule } from '../users/users.module';
-import { AuthMiddleware } from './auth.middleware';
+import { IsAuthenticated, AddFacebookCORS } from './auth.middleware';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 
@@ -8,8 +8,18 @@ import { AuthController } from './auth.controller';
     imports: [
         forwardRef(() => UsersModule)
     ],
-    components: [AuthService, AuthMiddleware],
+    components: [AuthService, IsAuthenticated],
     controllers: [AuthController],
-    exports: [AuthMiddleware]
+    exports: [IsAuthenticated]
 })
-export class AuthModule {}
+export class AuthModule {
+    constructor() {
+
+    }
+
+    configure(consumer: MiddlewaresConsumer): void {
+        consumer.apply(AddFacebookCORS).forRoutes(
+            { path: '/auth/facebook', method: RequestMethod.ALL },
+        );
+    }
+}
