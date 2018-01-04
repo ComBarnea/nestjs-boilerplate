@@ -14,6 +14,7 @@
     "@nestjs/core": "^4.4.0",
     "@nestjs/microservices": "^4.4.0",
     "@nestjs/mongoose": "^2.0.0",
+    "@nestjs/swagger": "^1.1.3",
     "@nestjs/testing": "^4.4.0",
     "@nestjs/websockets": "^4.4.0",
     "await-to-js": "^2.0.1",
