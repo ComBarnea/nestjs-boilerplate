@@ -1,4 +1,4 @@
-import {ApiModelProperty} from '@nestjs/swagger';
+import {ApiModelProperty, ApiModelPropertyOptional} from '@nestjs/swagger';
 
 export class LoginDto {
     @ApiModelProperty()
@@ -8,14 +8,19 @@ export class LoginDto {
 }
 
 export class FacebookDto {
-    @ApiModelProperty()
+    @ApiModelPropertyOptional()
     readonly sdk?: boolean;
-    @ApiModelProperty()
+    @ApiModelPropertyOptional()
     readonly accessToken?: string;
-    @ApiModelProperty()
+    @ApiModelPropertyOptional()
     code?: string;
-    @ApiModelProperty()
+    @ApiModelPropertyOptional()
     clientId?: string;
-    @ApiModelProperty()
+    @ApiModelPropertyOptional()
     redirectUri?: string;
+}
+
+export class FacebookDtoQuery {
+    @ApiModelPropertyOptional()
+    readonly sdk?: boolean;
 }
