@@ -28,6 +28,8 @@ export class UsersService {
      */
     public async validateUser(userId: string): Promise<boolean> {
         const foundUser = await this.userModel.findById(userId, '_id');
+        if (!foundUser) throw {err: 'Invalid user.'};
+
         return !!foundUser;
     }
 }

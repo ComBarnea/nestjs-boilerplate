@@ -1,6 +1,8 @@
+import {AuthProviderEnums} from '../auth/auth.enums';
+
 export interface AuthToken {
     accessToken: string;
-    kind: string;
+    provider: AuthProviderEnums;
 }
 
 export interface IUser {

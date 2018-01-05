@@ -3,12 +3,13 @@ import { UsersModule } from '../users/users.module';
 import { IsAuthenticated, AddFacebookCORS } from './auth.middleware';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import {JwtStrategy} from './passport/jwt.strategy';
 
 @Module({
     imports: [
         forwardRef(() => UsersModule)
     ],
-    components: [AuthService, IsAuthenticated],
+    components: [AuthService, IsAuthenticated, JwtStrategy],
     controllers: [AuthController],
     exports: [IsAuthenticated]
 })

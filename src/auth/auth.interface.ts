@@ -4,5 +4,6 @@ import {ICreateUser} from '../users/user.interface';
 export interface IAuthProviderLogin {
     providerType: AuthProviderEnums;
     user: ICreateUser;
-    providerId: String;
+    providerId: string;
+    providerToken: string;
 }

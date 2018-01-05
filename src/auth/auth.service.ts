@@ -51,6 +51,13 @@ export class AuthService {
         return this.createToken(foundUser);
     }
 
+    /**
+     * login or sign ups users based on provider
+     * @param {IAuthProviderLogin} providerLoginData
+     * @return {Promise<{access_token: string}>}
+     */
+    // TODO: wee need to be able to find user based on other details like email
+    // TODO: if found add needed data to said user for next login
     public async providerLogin(providerLoginData: IAuthProviderLogin) {
         if (!providerLoginData.providerId) throw new HttpException('Could not process provider', 500);
         if (!providerLoginData.providerType) throw new HttpException('Could not process provider', 500);
@@ -60,6 +67,12 @@ export class AuthService {
         foundUser = await this.userModel.findOne({ [providerLoginData.providerType]: providerLoginData.providerId });
         if (!foundUser) {
             providerLoginData.user[providerLoginData.providerType as string] = providerLoginData.providerId;
+            providerLoginData.user.tokens = [
+                {
+                    accessToken: providerLoginData.providerToken,
+                    provider: providerLoginData.providerType
+                }
+            ];
 
             foundUser = await this.usersService.create(providerLoginData.user);
         }
@@ -67,6 +80,11 @@ export class AuthService {
         return this.createToken(foundUser);
     }
 
+    /**
+     * handle all types of facebook login/sign up
+     * @param {FacebookDto} facebookData
+     * @return {Promise<Promise<{access_token: string}>>}
+     */
     public async facebook(facebookData: FacebookDto) {
         let accessToken: string;
         if (!facebookData.sdk) {
@@ -81,6 +99,12 @@ export class AuthService {
         return this.providerLogin(providerData);
     }
 
+    /**
+     * holding accessToken we can now grab our facebook user
+     * @param {string} accessToken
+     * @return {Promise<IAuthProviderLogin>}
+     * @private
+     */
     private async _facebookAuthentication(accessToken: string): Promise<IAuthProviderLogin> {
         const fields          = ['id', 'email', 'first_name', 'last_name', 'link', 'name', 'gender', 'age_range', 'birthday', 'location'];
         const graphApiUrl     = `https://graph.facebook.com/v${process.env.FACEBOOK_GRAPH_API_VERSION}/me?fields=${fields.join(',')}`;
@@ -101,10 +125,19 @@ export class AuthService {
             gender: profile.gender || null
         };
 
-        return { providerType: AuthProviderEnums.FACEBOOK, user, providerId: profile.id };
+        return { providerType: AuthProviderEnums.FACEBOOK, user, providerId: profile.id, providerToken: accessToken};
 
     }
 
+    /**
+     * with no facebook sdk on client side
+     * we need to convert code into access_token
+     * @param {string} code
+     * @param {string} clientId
+     * @param {string} redirectUri
+     * @return {Promise<string>}
+     * @private
+     */
     private async _facebookGetAccessToken(code: string, clientId: string, redirectUri: string): Promise<string> {
         const accessTokenUrl  = 'https://graph.facebook.com/v2.5/oauth/access_token';
 
