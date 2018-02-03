@@ -154,8 +154,8 @@ export class AuthService {
 
         return accessToken.access_token;
     }
-
 }
+
 // TODO: we should try and replace that with facebook js SDK if we can
 function wrappedRequest(params): Promise<{response: any, data: any}> {
     return new Promise((resolve, reject) => {

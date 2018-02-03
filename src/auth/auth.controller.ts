@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Query } from '@nestjs/common';
-import {FacebookDto, FacebookDtoQuery, LoginDto} from './auth.dto';
+import { FacebookDto, FacebookDtoQuery, LoginDto } from './auth.dto';
 import { AuthService } from './auth.service';
 import {ApiOperation} from '@nestjs/swagger';
 

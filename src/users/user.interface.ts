@@ -1,4 +1,4 @@
-import {AuthProviderEnums} from '../auth/auth.enums';
+import { AuthProviderEnums } from '../auth/auth.enums';
 
 export interface AuthToken {
     accessToken: string;

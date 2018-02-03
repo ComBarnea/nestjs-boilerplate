@@ -1,14 +1,3 @@
-require('ts-node/register');
-require('./src/main');
-
-
-
-
-
-
-
-
-
-
-
-
+require("ts-node/register");
+const app = require("./src/main");
+app.bootstrap();
