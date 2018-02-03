@@ -1,10 +1,10 @@
-import { Module, NestModule, forwardRef, MiddlewaresConsumer, Component } from '@nestjs/common';
+import { Module, NestModule, forwardRef, MiddlewaresConsumer } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { IsAuthenticated } from '../auth/auth.middleware';
 import { AuthModule } from '../auth/auth.module';
 import { UserSchema } from './schemas/user.schema';
 import { UsersController } from './users.controller';
-import {UsersService} from './users.service';
+import { UsersService } from './users.service';
 
 @Module({
     imports: [

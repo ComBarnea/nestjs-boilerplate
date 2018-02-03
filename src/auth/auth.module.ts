@@ -3,13 +3,13 @@ import { UsersModule } from '../users/users.module';
 import { IsAuthenticated, AddFacebookCORS } from './auth.middleware';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import {JwtStrategy} from './passport/jwt.strategy';
+import {FacebookProvider} from './loginProviders/facebook.provider';
 
 @Module({
     imports: [
         forwardRef(() => UsersModule)
     ],
-    components: [AuthService, IsAuthenticated, JwtStrategy],
+    components: [AuthService, IsAuthenticated, FacebookProvider],
     controllers: [AuthController],
     exports: [IsAuthenticated]
 })
@@ -21,6 +21,7 @@ export class AuthModule {
     configure(consumer: MiddlewaresConsumer): void {
         consumer.apply(AddFacebookCORS).forRoutes(
             { path: '/auth/facebook', method: RequestMethod.ALL },
+            { path: '/auth/facebook/callback', method: RequestMethod.ALL },
         );
     }
 }

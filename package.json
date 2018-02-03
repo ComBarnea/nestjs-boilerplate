@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "start:watch": "nodemon",
-    "prestart:prod": "tsc",
+    "build": "tsc",
+    "prestart:prod": "npm run build",
     "start:prod": "node dist/main.js",
     "test": "jest --forceExit --coverage",
     "test:watch": "jest --watch",
@@ -33,6 +34,10 @@
       "lcov"
     ]
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/scopsy/nestjs-boilerplate"
+  },
   "dependencies": {
     "@nestjs/common": "^4.5.9",
     "@nestjs/core": "^4.5.10",
@@ -42,15 +47,15 @@
     "@nestjs/testing": "^4.5.5",
     "@nestjs/websockets": "^4.4.0",
     "await-to-js": "^2.0.1",
+    "bcrypt": "^1.0.3",
+    "bunyan": "^1.8.12",
     "cors": "^2.8.4",
     "dotenv": "^4.0.0",
     "express": "^4.16.2",
-    "facebook-nodejs-ads-sdk": "^2.11.2",
     "jsonwebtoken": "^8.1.0",
     "mongoose": "^5.0.3",
+    "lodash": "^4.17.4",
     "morgan": "^1.9.0",
-    "passport": "^0.4.0",
-    "passport-jwt": "^3.0.1",
     "redis": "^2.7.1",
     "reflect-metadata": "^0.1.10",
     "request": "^2.83.0",
@@ -74,6 +79,16 @@
     "supertest": "^3.0.0",
     "ts-jest": "^22.0.1",
     "ts-node": "^4.1.0",
-    "tslint": "^5.9.1"
+    "tslint": "^5.9.1",
+    "@nestjs/common": "^4.4.0",
+    "@nestjs/core": "^4.4.0",
+    "@nestjs/microservices": "^4.4.0",
+    "@nestjs/mongoose": "^2.0.0",
+    "@nestjs/swagger": "^1.1.3",
+    "@nestjs/testing": "^4.4.0",
+    "@nestjs/websockets": "^4.4.0",
+    "@types/bunyan": "^1.8.4",
+    "@types/lodash": "^4.14.92",
+    "tsconfig-paths": "^3.1.1"
   }
 }

@@ -1,10 +1,11 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { Component, HttpException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 
 import { Model } from 'mongoose';
-import {UserSchema} from './schemas/user.schema';
-import {UserModel} from './users.provider';
-import {ICreateUser} from './user.interface';
+import { UserSchema } from './schemas/user.schema';
+import { UserModel } from './users.provider';
+import { ICreateUser, IFindUserByEmail, IFindUserById, IFindUserByProvider } from './user.interface';
 
 @Component()
 export class UsersService {
@@ -16,6 +17,13 @@ export class UsersService {
     public async create(userData: ICreateUser): Promise<UserModel> {
         if (!userData.email) throw new HttpException('Email is required', 422);
         if (!userData.firstName) throw new HttpException('First Name is required', 422);
+
+        if (userData.password) {
+            userData.password = String(userData.password);
+            if (!checkPassword(userData.password)) throw new HttpException('Password no good.', 400);
+
+            userData.password = await hashPassword(userData.password);
+        }
 
         return this.userModel.create(userData);
     }
@@ -32,4 +40,79 @@ export class UsersService {
 
         return !!foundUser;
     }
+
+    public async findUserForLogin(userData: IFindUserByEmail): Promise<UserModel> {
+        if (!userData.email) throw new HttpException('Find condition are required.', 422);
+        const findConditions = {
+            email: userData.email
+        };
+
+        return await this.userModel.findOne(findConditions, ['_id', 'password']);
+    }
+
+    public async findUserById(userData: IFindUserById): Promise<UserModel> {
+        if (!userData._id) throw new HttpException('Find condition are required.', 422);
+
+        const findConditions = {
+            _id: userData._id
+        };
+
+        return await this.userModel.findOne(findConditions);
+    }
+
+    public async findUserByEmail(userData: IFindUserByEmail): Promise<UserModel> {
+        if (!userData.email) throw new HttpException('Find condition are required.', 422);
+        const findConditions = {
+            email: userData.email
+        };
+
+        return await this.userModel.findOne(findConditions);
+    }
+
+    public async findUserByProvider(userData: IFindUserByProvider): Promise<UserModel> {
+        if (!userData.providerId || !userData.providerType) throw new HttpException('Find condition are required.', 422);
+
+        const findConditions = {
+            [userData.providerType]: userData.providerId
+        };
+
+        return await this.userModel.findOne(findConditions);
+    }
+
+    public async updateOne(userData: IFindUserById, updateData): Promise<UserModel> {
+        if (!userData._id) throw new HttpException('Find condition are required.', 422);
+
+        if (updateData.password) {
+            updateData.password = hashPassword(updateData.password);
+        }
+
+        const findConditions = {
+            _id: userData._id
+        };
+
+        await this.userModel.update(findConditions, updateData);
+
+        return await this.findUserById(findConditions);
+    }
+}
+
+/**
+ * Password hash middleware.
+ * @param {string} password
+ * @return {Promise<void>}
+ */
+function hashPassword(password: string) {
+    return bcrypt.hash(String(password), 10)
+        .then((hash) => {
+            return hash;
+        })
+        .catch(() => {
+            throw {err: 'Error hashing password'};
+        });
+}
+
+function checkPassword(password: string) {
+    const passwordReg = /^.{6,}$/;
+
+    return passwordReg.test(password);
 }

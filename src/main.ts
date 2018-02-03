@@ -8,6 +8,7 @@ import { NestFactory } from '@nestjs/core';
 import { PORT, ROUTE_PREFIX } from './app.constants';
 import { ApplicationModule } from './app.module';
 import { initDocumentation } from './documentation';
+import {ExitInterceptor} from './interceptors/app.exit.interceptor';
 
 export async function bootstrap() {
     const server = express();
@@ -21,6 +22,7 @@ export async function bootstrap() {
      * will help with breaking changes for future releases
      */
     app.setGlobalPrefix(ROUTE_PREFIX);
+    app.useGlobalInterceptors(new ExitInterceptor());
 
     initDocumentation(app, {
         version: '0.0.1',

@@ -7,6 +7,17 @@ export class LoginDto {
     readonly password: string;
 }
 
+export class RegisterDto {
+    @ApiModelProperty()
+    readonly email: string;
+    @ApiModelProperty()
+    readonly password: string;
+    @ApiModelProperty()
+    readonly firstName: string;
+    @ApiModelProperty()
+    readonly lastName: string;
+}
+
 export class FacebookDto {
     @ApiModelPropertyOptional()
     readonly sdk?: boolean;

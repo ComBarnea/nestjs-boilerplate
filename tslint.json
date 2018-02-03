@@ -9,6 +9,7 @@
     "rules": {
         "trailing-comma": false,
         "eofline": false,
+        "no-console": false,
         "quotemark": [
             true,
             "single"
