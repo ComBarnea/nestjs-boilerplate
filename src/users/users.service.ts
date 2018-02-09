@@ -82,7 +82,7 @@ export class UsersService {
     public async updateOne(userData: IFindUserById, updateData): Promise<UserModel> {
         if (!userData._id) throw new HttpException('Find condition are required.', 422);
 
-        if (updateData.password) {
+        if (updateData.hasOwnProperty('password')) {
             updateData.password = hashPassword(updateData.password);
         }
 

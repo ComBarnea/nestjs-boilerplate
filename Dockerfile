@@ -1,12 +1,14 @@
-FROM node:8.9.0
+FROM node:8.9.4
 
-COPY . /src
+COPY . /dist
 
-WORKDIR /src
+WORKDIR /dist
 
-ENV NODE_ENV production
-RUN npm install --production
-
-CMD ["npm","run start:prod"]
+RUN npm install
+RUN npm install pm2 -g
+ENV DOCKER_ENV true
+# CMD ["npm","run start:prod"]
 
 EXPOSE 3000
+
+CMD pm2-docker start dist/server.js

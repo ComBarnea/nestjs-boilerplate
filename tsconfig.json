@@ -7,21 +7,17 @@
     "noLib": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "types": ["node", "reflect-metadata"],
-    "lib": [ "es2015" ],
-    "target": "es6",
+    "types": ["node", "reflect-metadata", "jest"],
+    "lib": ["es5", "es6", "es2015"],
+    "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": ".",
-    "paths": {
-      "@utils/*": ["./src/utils/*"]
-    }
+    "baseUrl": "."
   },
   "include": [
     "src/**/*"
   ],
   "exclude": [
-    "node_modules",
-    "**/*.spec.ts"
+    "node_modules"
   ]
 }

@@ -9,8 +9,6 @@ import {$log} from '../utils/utils';
 @Interceptor()
 export class ExitInterceptor implements NestInterceptor {
     intercept(dataOrRequest, context: ExecutionContext, stream$: Observable<any>): Observable<any> {
-        $log.log('Before...');
-        const now = Date.now();
 
         return stream$.map((data) => {
             return {data};

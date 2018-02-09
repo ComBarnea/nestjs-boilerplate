@@ -1,5 +1,5 @@
 import { Middleware, NestMiddleware, HttpException, HttpStatus } from '@nestjs/common';
-import { NextFunction, Request } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import * as cors from 'cors';
 import * as jwt from 'jsonwebtoken';
 import { AuthService } from './auth.service';
