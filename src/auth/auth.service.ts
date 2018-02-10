@@ -3,7 +3,7 @@ import { Component, HttpException, Inject } from '@nestjs/common';
 import { UserModel } from '../user/user.provider';
 import { FacebookDto } from './auth.dto';
 
-import { IAuthProviderLogin } from './auth.interface';
+import { IAuthProviderLogin } from './auth.types';
 import { ICreateUser, IUpdateUser } from '../user/user.interface';
 import { UsersService } from '../user/user.service';
 import { FacebookProvider } from './loginProviders/facebook.provider';
@@ -60,6 +60,7 @@ export class AuthService {
         let foundUser: UserModel;
         foundUser = await this.usersService.findUserForLogin({ email: userData.email});
         if (foundUser) throw new HttpException('User already found', 409);
+
 
         foundUser = await this.usersService.create(userData);
 

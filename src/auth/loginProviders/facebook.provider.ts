@@ -1,8 +1,8 @@
-import { Component, HttpException } from '@nestjs/common';
+import { Component } from '@nestjs/common';
 import { AuthProviderEnums } from '../auth.enums';
-import { IAuthProviderLogin } from '../auth.interface';
+import { IAuthProviderLogin } from '../auth.types';
 import { ICreateUser } from '../../user/user.interface';
-import * as requestLib from 'request';
+import { wrappedRequest } from '../../utils/index';
 
 @Component()
 export class FacebookProvider {
@@ -22,7 +22,7 @@ export class FacebookProvider {
         };
 
         // Step 1. Exchange authorization code for access token.
-        const {data: profile} = await _wrappedRequest({url: graphApiUrl, qs: params, json: true});
+        const {data: profile} = await wrappedRequest({url: graphApiUrl, qs: params, json: true});
 
         const user: ICreateUser = {
             profilePicture: `https://graph.facebook.com/${profile.id}/picture?type=large`,
@@ -57,20 +57,8 @@ export class FacebookProvider {
         };
 
         // Step 1. Exchange authorization code for access token.
-        const {data: accessToken} = await _wrappedRequest({url: accessTokenUrl, qs: params, json: true});
+        const {data: accessToken} = await wrappedRequest({url: accessTokenUrl, qs: params, json: true});
 
         return accessToken.access_token;
     }
-}
-
-// TODO: we should try and replace that with facebook js SDK if we can
-function _wrappedRequest(params): Promise<{response: any, data: any}> {
-    return new Promise((resolve, reject) => {
-        requestLib.get(params, (err, response, data) => {
-            if (err) throw err;
-            if (response.statusCode !== 200) throw new HttpException(data.error.message, 401);
-
-            resolve({response, data});
-        });
-    });
 }
