@@ -1,2 +1,2 @@
-import {bootstrap} from './main';
+import { bootstrap } from './main';
 bootstrap();

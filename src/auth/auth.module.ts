@@ -1,9 +1,9 @@
-import {forwardRef, MiddlewaresConsumer, Module, RequestMethod} from '@nestjs/common';
-import { UsersModule } from '../users/users.module';
+import { forwardRef, MiddlewaresConsumer, Module, RequestMethod } from '@nestjs/common';
+import { UsersModule } from '../user/user.module';
 import { IsAuthenticated, AddFacebookCORS } from './auth.middleware';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import {FacebookProvider} from './loginProviders/facebook.provider';
+import { FacebookProvider } from './loginProviders/facebook.provider';
 
 @Module({
     imports: [

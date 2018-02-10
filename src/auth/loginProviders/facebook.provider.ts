@@ -1,7 +1,7 @@
-import {Component, HttpException} from '@nestjs/common';
-import {AuthProviderEnums} from '../auth.enums';
-import {IAuthProviderLogin} from '../auth.interface';
-import {ICreateUser} from '../../users/user.interface';
+import { Component, HttpException } from '@nestjs/common';
+import { AuthProviderEnums } from '../auth.enums';
+import { IAuthProviderLogin } from '../auth.interface';
+import { ICreateUser } from '../../user/user.interface';
 import * as requestLib from 'request';
 
 @Component()

@@ -24,6 +24,7 @@
         "member-ordering": [
             false
         ],
+        "no-string-literal": false,
         "curly": false,
         "interface-name": [
             false
@@ -48,6 +49,10 @@
         ],
         "one-variable-per-declaration": [
             false
+        ],
+        "whitespace": [
+            true,
+            "check-module"
         ]
     },
     "rulesDirectory": []

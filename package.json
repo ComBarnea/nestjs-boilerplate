@@ -7,9 +7,10 @@
     "start": "node index.js",
     "start:watch": "nodemon",
     "build": "tsc",
-    "predockerize": "npm run build",
+    "predockerize": "npm run lint && npm run build",
     "dockerize": "./config/dockerize.sh",
     "start:prod": "node dist/main.js",
+    "lint": "tslint -c tslint.json -p tsconfig.json",
     "test": "jest --forceExit --coverage",
     "test:watch": "jest --watch",
     "e2e": "jest --config=e2e/jest-e2e.json --forceExit"

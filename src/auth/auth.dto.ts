@@ -1,4 +1,4 @@
-import {ApiModelProperty, ApiModelPropertyOptional} from '@nestjs/swagger';
+import { ApiModelProperty, ApiModelPropertyOptional } from '@nestjs/swagger';
 
 export class LoginDto {
     @ApiModelProperty()

@@ -1,5 +1,5 @@
-import {AuthProviderEnums} from './auth.enums';
-import {ICreateUser} from '../users/user.interface';
+import { AuthProviderEnums } from './auth.enums';
+import { ICreateUser } from '../user/user.interface';
 
 export interface IAuthProviderLogin {
     providerType: AuthProviderEnums;

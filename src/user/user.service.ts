@@ -4,7 +4,7 @@ import * as bcrypt from 'bcrypt';
 
 import { Model } from 'mongoose';
 import { UserSchema } from './schemas/user.schema';
-import { UserModel } from './users.provider';
+import { UserModel } from './user.provider';
 import { ICreateUser, IFindUserByEmail, IFindUserById, IFindUserByProvider } from './user.interface';
 
 @Component()

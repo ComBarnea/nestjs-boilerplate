@@ -1,9 +1,8 @@
-
-import {Controller, Post, Body, Query, Get} from '@nestjs/common';
-import {FacebookDto, LoginDto, RegisterDto} from './auth.dto';
+import { Controller, Post, Body, Query, Get } from '@nestjs/common';
+import { FacebookDto, LoginDto, RegisterDto } from './auth.dto';
 
 import { AuthService } from './auth.service';
-import {ApiOperation} from '@nestjs/swagger';
+import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {

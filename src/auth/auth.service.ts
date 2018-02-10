@@ -1,21 +1,17 @@
-import { InjectModel } from '@nestjs/mongoose';
 import * as jwt from 'jsonwebtoken';
-import {Component, HttpException, Inject} from '@nestjs/common';
-import { UserSchema } from '../users/schemas/user.schema';
-import { UserModel } from '../users/users.provider';
-import { Model } from 'mongoose';
-import {FacebookDto} from './auth.dto';
+import { Component, HttpException, Inject } from '@nestjs/common';
+import { UserModel } from '../user/user.provider';
+import { FacebookDto } from './auth.dto';
 
-import {IAuthProviderLogin} from './auth.interface';
-import {ICreateUser, IUpdateUser} from '../users/user.interface';
-import {UsersService} from '../users/users.service';
-import {FacebookProvider} from './loginProviders/facebook.provider';
+import { IAuthProviderLogin } from './auth.interface';
+import { ICreateUser, IUpdateUser } from '../user/user.interface';
+import { UsersService } from '../user/user.service';
+import { FacebookProvider } from './loginProviders/facebook.provider';
 
 @Component()
 export class AuthService {
     private tokenExp = '2 days';
     constructor(
-        @InjectModel(UserSchema) private userModel: Model<UserModel>,
         @Inject(UsersService) private usersService: UsersService,
         @Inject(FacebookProvider) private facebookProvider: FacebookProvider,
     ) {
