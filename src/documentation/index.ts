@@ -1,5 +1,5 @@
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { IInitDocumentation } from './documentation.interface';
+import { IInitDocumentation } from './documentation.types';
 import { INestApplication } from '@nestjs/common';
 
 export function initDocumentation(app: INestApplication, initData: IInitDocumentation) {

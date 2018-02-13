@@ -14,6 +14,7 @@ export class IsAuthenticated implements NestMiddleware {
             if (req.headers.authorization && (req.headers.authorization as string).split(' ')[0] === 'Bearer') {
                 const token = (req.headers.authorization as string).split(' ')[1];
                 let decoded: any;
+
                 try {
                     decoded = jwt.verify(token, process.env.SECRET);
                 } catch (e) {
@@ -21,7 +22,11 @@ export class IsAuthenticated implements NestMiddleware {
                     throw new HttpException('Authentication Error', HttpStatus.UNAUTHORIZED);
                 }
 
-                await this.authService.validateUser(decoded._id);
+                try {
+                    await this.authService.validateUser(decoded._id);
+                } catch {
+                    throw new HttpException('Authentication Error', HttpStatus.UNAUTHORIZED);
+                }
 
                 return next();
             } else {

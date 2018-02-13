@@ -52,6 +52,6 @@ describe('Facebook provider', () => {
             expect((utils.wrappedRequest as jest.Mock).mock.calls[0][0].qs.code).toBe('sdfgyhujikol');
 
             expect(answer).toBe(dataAnswer.access_token);
-        })
+        });
     });
 });

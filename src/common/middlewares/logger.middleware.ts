@@ -26,6 +26,7 @@ export class LoggerMiddleware implements NestMiddleware {
                 req.ip,
                 chalk.white('route: ', req.path)
             );
+
             logger.log(message);
             next();
         };

@@ -87,7 +87,7 @@ describe('User Service', () => {
 
     describe('validateUser', () => {
         it('should return user', async () => {
-            userModel.findById = jest.fn(() => Promise.resolve(userRepo['id1']))
+            userModel.findById = jest.fn(() => Promise.resolve(userRepo['id1']));
 
             const foundUser = await userService.validateUser('id1');
 
@@ -97,7 +97,7 @@ describe('User Service', () => {
 
         it('should throw invalid user', async () => {
             try {
-                userModel.findById = jest.fn(() => Promise.resolve(userRepo['id3']))
+                userModel.findById = jest.fn(() => Promise.resolve(userRepo['id3']));
 
                 const foundUser = await userService.validateUser('id3');
             } catch (e) {

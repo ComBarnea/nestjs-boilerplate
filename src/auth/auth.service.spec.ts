@@ -1,3 +1,7 @@
+jest.setMock('jsonwebtoken', {
+    sign: jest.fn(() => 'access_token')
+});
+import * as jwt from 'jsonwebtoken';
 import { AuthService } from './auth.service';
 
 describe('Auth Service', () => {
@@ -9,7 +13,8 @@ describe('Auth Service', () => {
         usersService = {
             validateUser: jest.fn(() => Promise.resolve(true)),
             findUserForLogin: jest.fn(),
-            findUserByEmail: jest.fn()
+            findUserByEmail: jest.fn(),
+            create: jest.fn(() => Promise.resolve(true))
         };
         facebookProvider = {};
         authService = new AuthService(usersService, facebookProvider);
@@ -91,23 +96,50 @@ describe('Auth Service', () => {
                 profilePicture: 'picurl'
             };
 
-            Object.defineProperty(authService, 'createToken', {value: jest.fn(() => Promise.resolve({
-                    access_token: 'access_token'
-                }))});
-
             usersService.findUserForLogin = jest.fn(() => Promise.resolve(mockedUser));
             usersService.findUserByEmail = jest.fn(() => Promise.resolve(mockedUser));
 
             const createdToken = await authService.login('test@tes.com', 'rghji6567u');
 
-            expect(authService['createToken']).toHaveBeenCalledTimes(1);
+            expect(jwt.sign).toHaveBeenCalledTimes(1);
             expect(createdToken.access_token).toBe('access_token');
 
         });
     });
 
     describe('register', () => {
+        it('should fail with user already found', async () => {
+            const createData = {
+                email: 'test@tes.com',
+                password: 'rghji6567u',
+            };
 
+            usersService.findUserForLogin = jest.fn(() => Promise.resolve({id: '56yhv'}));
+            try {
+                await authService.register(createData);
+            } catch (e) {
+                expect(usersService.findUserForLogin).toHaveBeenCalledTimes(1);
+                expect(e.message).toBe('User already found');
+                expect(e.status).toBe(409);
+            }
+
+        });
+
+        it('should create user', async () => {
+            const createData = {
+                email: 'test@tes.com',
+                password: 'rghji6567u',
+            };
+
+            usersService.findUserForLogin = jest.fn(() => Promise.resolve(null));
+
+            const createdToken = await authService.register(createData);
+
+            expect(usersService.findUserForLogin).toHaveBeenCalledTimes(1);
+            expect(usersService.create).toHaveBeenCalledTimes(1);
+            expect(usersService.create.mock.calls[0][0]).toEqual(createData);
+            expect(createdToken.access_token).toBe('access_token');
+        });
     });
 
     describe('providerLogin', () => {
@@ -118,4 +150,7 @@ describe('Auth Service', () => {
 
     });
 
+    afterAll(async () => {
+        jest.restoreAllMocks();
+    });
 });

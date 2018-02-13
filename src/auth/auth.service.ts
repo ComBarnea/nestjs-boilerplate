@@ -61,7 +61,6 @@ export class AuthService {
         foundUser = await this.usersService.findUserForLogin({ email: userData.email});
         if (foundUser) throw new HttpException('User already found', 409);
 
-
         foundUser = await this.usersService.create(userData);
 
         return this.createToken(foundUser);
