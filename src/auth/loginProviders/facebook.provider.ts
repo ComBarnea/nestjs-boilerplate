@@ -1,7 +1,7 @@
 import { Component } from '@nestjs/common';
 import { AuthProviderEnums } from '../auth.enums';
 import { IAuthProviderLogin } from '../auth.types';
-import { ICreateUser } from '../../user/user.interface';
+import { ICreateUser } from '../../user/user.types';
 import { wrappedRequest } from '../../utils/index';
 
 @Component()

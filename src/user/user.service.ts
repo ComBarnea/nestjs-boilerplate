@@ -1,11 +1,12 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { Component, HttpException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import * as moment from 'moment';
 
 import { Model } from 'mongoose';
 import { UserSchema } from './schemas/user.schema';
 import { UserModel } from './user.provider';
-import { ICreateUser, IFindUserByEmail, IFindUserById, IFindUserByProvider } from './user.interface';
+import { ICreateUser, IFindUserByEmail, IFindUserById, IFindUserByProvider, IFindUserByResetToken } from './user.types';
 
 @Component()
 export class UsersService {
@@ -79,11 +80,24 @@ export class UsersService {
         return await this.userModel.findOne(findConditions);
     }
 
+    public async findUserByResetToken(userData: IFindUserByResetToken): Promise<UserModel> {
+        if (!userData.resetToken) throw new HttpException('Find condition are required.', 422);
+
+        const findConditions = {
+            resetToken: userData.resetToken
+        };
+
+        return await this.userModel.findOne(findConditions);
+    }
+
     public async updateOne(userData: IFindUserById, updateData): Promise<UserModel> {
         if (!userData._id) throw new HttpException('Find condition are required.', 422);
 
         if (updateData.hasOwnProperty('password')) {
-            updateData.password = hashPassword(updateData.password);
+            updateData.password = String(updateData.password);
+            if (!checkPassword(updateData.password)) throw new HttpException('Password no good.', 400);
+
+            updateData.password = await hashPassword(updateData.password);
         }
 
         const findConditions = {

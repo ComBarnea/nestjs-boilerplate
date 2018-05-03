@@ -14,6 +14,9 @@ export interface IUser {
     readonly lastName: string;
     readonly gender: string;
     readonly profilePicture: string;
+    readonly resetToken?: string;
+    readonly resetTokenValidUntil?: Date;
+
     comparePassword(candidatePassword: string): boolean;
 }
 
@@ -35,11 +38,17 @@ export interface IUpdateUser {
     firstName?: string;
     lastName?: string;
     gender?: string;
+    password?: string;
     profilePicture?: string;
+    resetToken?: string;
+    resetTokenValidUntil?: Date;
 }
 
 export interface IFindUserById {
     _id: string;
+}
+export interface IFindUserByResetToken {
+    resetToken: string;
 }
 export interface IFindUserByEmail {
     email: string;

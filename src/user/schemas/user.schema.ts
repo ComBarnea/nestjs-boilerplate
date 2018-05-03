@@ -12,6 +12,14 @@ export const UserSchema = new mongoose.Schema({
         type: String,
         select: false
     },
+    resetToken: {
+        type: String,
+        select: false
+    },
+    resetTokenValidUntil: {
+        type: Date,
+        select: false
+    },
     profilePicture: String
 }, { timestamps: true });
 

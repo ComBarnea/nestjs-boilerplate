@@ -35,3 +35,20 @@ export class FacebookDtoQuery {
     @ApiModelPropertyOptional()
     readonly sdk?: boolean;
 }
+
+export class PasswordResetRequestDto {
+    @ApiModelPropertyOptional()
+    readonly email: string;
+}
+
+export class GetUserWithPasswordResetTokenDto {
+    @ApiModelPropertyOptional()
+    readonly token: string;
+}
+
+export class PasswordResetDto {
+    @ApiModelPropertyOptional()
+    readonly token: string;
+    @ApiModelPropertyOptional()
+    readonly newPassword: string;
+}

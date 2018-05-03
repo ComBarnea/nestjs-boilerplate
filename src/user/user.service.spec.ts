@@ -1,5 +1,5 @@
 import { UsersService } from './user.service';
-import { ICreateUser } from './user.interface';
+import { ICreateUser } from './user.types';
 
 describe('User Service', () => {
     let userService: UsersService;
@@ -37,6 +37,15 @@ describe('User Service', () => {
                 await userService.create({firstName: 'test'} as any);
             } catch (c) {
                 expect(c.message).toBe('Email is required');
+                expect(c.status).toBe(422);
+            }
+        });
+
+        it('should throw missing firstName', async () => {
+            try {
+                await userService.create({email: 'test@test.com'} as any);
+            } catch (c) {
+                expect(c.message).toBe('First Name is required');
                 expect(c.status).toBe(422);
             }
         });
@@ -109,7 +118,23 @@ describe('User Service', () => {
     });
 
     describe('findUserForLogin', () => {
+        it('should throw missing params', async () => {
+            try {
+                await userService.findUserForLogin({} as any);
+            } catch (c) {
+                expect(c.message).toBe('Find condition are required.');
+                expect(c.status).toBe(422);
+            }
+        });
 
+        it('should return user', async () => {
+            try {
+                await userService.findUserForLogin({} as any);
+            } catch (c) {
+                expect(c.message).toBe('Find condition are2 required.');
+                expect(c.status).toBe(422);
+            }
+        });
     });
 
     describe('findUserById', () => {

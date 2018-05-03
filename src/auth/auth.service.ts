@@ -1,16 +1,23 @@
 import * as jwt from 'jsonwebtoken';
+import * as moment from 'moment';
 import { Component, HttpException, Inject } from '@nestjs/common';
 import { UserModel } from '../user/user.provider';
 import { FacebookDto } from './auth.dto';
 
-import { IAuthProviderLogin } from './auth.types';
-import { ICreateUser, IUpdateUser } from '../user/user.interface';
+import {
+    IAuthProviderLogin, IGetUserWithPasswordResetToken, IResetPasswordRequest,
+    IResetUserPassword
+} from './auth.types';
+import { ICreateUser, IUpdateUser } from '../user/user.types';
 import { UsersService } from '../user/user.service';
 import { FacebookProvider } from './loginProviders/facebook.provider';
+import { generateGUID } from '../utils';
 
 @Component()
 export class AuthService {
     private tokenExp = '2 days';
+    private passwordRequestTokenExpHours = 48;
+
     constructor(
         @Inject(UsersService) private usersService: UsersService,
         @Inject(FacebookProvider) private facebookProvider: FacebookProvider,
@@ -139,5 +146,50 @@ export class AuthService {
         const providerData = await this.facebookProvider.authentication(accessToken);
 
         return this.providerLogin(providerData);
+    }
+
+    public async createPasswordResetRequest(resetRequestData: IResetPasswordRequest) {
+        if (!resetRequestData.email) throw new HttpException('Email is required', 422);
+
+        const user = await this.usersService.findUserByEmail({email: resetRequestData.email});
+        if (!user) throw new HttpException('User not found', 401);
+
+        const updateData: Partial<IUpdateUser>= {
+            resetToken: generateGUID(),
+            resetTokenValidUntil: moment().add(this.passwordRequestTokenExpHours, 'h').toDate()
+        };
+
+        if (process.verbose) console.log(updateData);
+        // add external center
+        await this.usersService.updateOne({_id: user._id}, updateData);
+
+        return 'Request successful.';
+    }
+
+    public async getUserWithPasswordResetToken(requestData: IGetUserWithPasswordResetToken) {
+        if (!requestData.token) throw new HttpException('Token is required', 422);
+
+        const user = await this.usersService.findUserByResetToken({resetToken: requestData.token});
+
+        if (!user) throw new HttpException('Request is invalid, try again.', 409);
+        if (moment().isAfter(user.resetTokenValidUntil)) throw new HttpException('Request is invalid, try again.', 409);
+
+        return user;
+    }
+
+    public async resetUserPassword(requestData: IResetUserPassword) {
+        if (!requestData.token) throw new HttpException('Token is required', 422);
+        if (!requestData.newPassword) throw new HttpException('New password is required', 422);
+
+        const user = await this.getUserWithPasswordResetToken(requestData);
+
+        const updateData: Partial<IUpdateUser>= {
+            resetTokenValidUntil: moment().toDate(),
+            password: requestData.newPassword
+        };
+
+        await this.usersService.updateOne({_id: user._id}, updateData);
+
+        return 'Request successful.';
     }
 }
