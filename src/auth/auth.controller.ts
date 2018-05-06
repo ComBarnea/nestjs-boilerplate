@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Query, Get } from '@nestjs/common';
 import {
-    FacebookDto, GetUserWithPasswordResetTokenDto, LoginDto, PasswordResetDto, PasswordResetRequestDto,
+    FacebookDto, GetUserWithPasswordResetTokenDto, GoogleDto, LoginDto, PasswordResetDto, PasswordResetRequestDto,
     RegisterDto
 } from './auth.dto';
 
@@ -42,6 +42,26 @@ export class AuthController {
         Without sdk code, clientId, and redirectUri are required.`
     })
     public async facebookCallback(@Query() query: FacebookDto) {
+        return await this.authService.facebook(query);
+    }
+
+    @Post('/google')
+    @ApiOperation({
+        title: 'Google login and sign up.',
+        description: `Can be with sdk=true and than accessToken is required.
+        Without sdk code, clientId, and redirectUri are required.`
+    })
+    public async google(@Body() body: GoogleDto) {
+        return await this.authService.facebook(body);
+    }
+
+    @Get('/google/callback')
+    @ApiOperation({
+        title: 'Google login and sign up.',
+        description: `Can be with sdk=true and than accessToken is required.
+        Without sdk code, clientId, and redirectUri are required.`
+    })
+    public async googleCallback(@Query() query: GoogleDto) {
         return await this.authService.facebook(query);
     }
 

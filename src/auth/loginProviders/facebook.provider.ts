@@ -2,7 +2,7 @@ import { Component } from '@nestjs/common';
 import { AuthProviderEnums } from '../auth.enums';
 import { IAuthProviderLogin } from '../auth.types';
 import { ICreateUser } from '../../user/user.types';
-import { wrappedRequest } from '../../utils/index';
+import { wrappedRequest } from '../../utils';
 
 @Component()
 export class FacebookProvider {
@@ -33,7 +33,6 @@ export class FacebookProvider {
         };
 
         return { providerType: AuthProviderEnums.FACEBOOK, user, providerId: profile.id, providerToken: accessToken};
-
     }
 
     /**

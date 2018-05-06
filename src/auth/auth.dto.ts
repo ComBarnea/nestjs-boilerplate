@@ -31,6 +31,17 @@ export class FacebookDto {
     redirectUri?: string;
 }
 
+export class GoogleDto {
+    @ApiModelPropertyOptional()
+    readonly accessToken?: string;
+    @ApiModelPropertyOptional()
+    code?: string;
+    @ApiModelPropertyOptional()
+    clientId?: string;
+    @ApiModelPropertyOptional()
+    redirectUri?: string;
+}
+
 export class FacebookDtoQuery {
     @ApiModelPropertyOptional()
     readonly sdk?: boolean;
