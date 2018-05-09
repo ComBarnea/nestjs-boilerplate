@@ -38,7 +38,7 @@ export class IsAuthenticated implements NestMiddleware {
 
 // TODO: change to facebook CORS
 @Middleware()
-export class AddFacebookCORS implements NestMiddleware {
+export class EnableCORS implements NestMiddleware {
     resolve() {
         return async (req: Request, res: Response, next: NextFunction) => {
             return cors({

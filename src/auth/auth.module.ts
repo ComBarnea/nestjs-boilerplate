@@ -1,9 +1,9 @@
 import { forwardRef, MiddlewaresConsumer, Module, RequestMethod } from '@nestjs/common';
 import { UsersModule } from '../user/user.module';
-import { IsAuthenticated, AddFacebookCORS } from './auth.middleware';
+import { IsAuthenticated, EnableCORS } from './auth.middleware';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { FacebookProvider } from './loginProviders/facebook.provider';
+import { FacebookProvider } from './authProviders/facebook.provider';
 
 @Module({
     imports: [
@@ -19,7 +19,7 @@ export class AuthModule {
     }
 
     configure(consumer: MiddlewaresConsumer): void {
-        consumer.apply(AddFacebookCORS).forRoutes(
+        consumer.apply(EnableCORS).forRoutes(
             { path: '/auth/facebook', method: RequestMethod.ALL },
             { path: '/auth/facebook/callback', method: RequestMethod.ALL },
         );

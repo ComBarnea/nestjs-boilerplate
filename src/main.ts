@@ -20,7 +20,7 @@ export async function bootstrap() {
     server.use(bodyParser.json());
     server.use(bodyParser.urlencoded({ extended: false }));
 
-    const app = await NestFactory.create(ApplicationModule, server);
+    const app = await NestFactory.create(ApplicationModule, server, {});
     /**
      * Prefix our api with a version prefix,
      * will help with breaking changes for future releases

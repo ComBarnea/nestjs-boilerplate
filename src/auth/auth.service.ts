@@ -10,7 +10,7 @@ import {
 } from './auth.types';
 import { ICreateUser, IUpdateUser } from '../user/user.types';
 import { UsersService } from '../user/user.service';
-import { FacebookProvider } from './loginProviders/facebook.provider';
+import { FacebookProvider } from './authProviders/facebook.provider';
 import { generateGUID } from '../utils';
 
 @Component()
