@@ -17,7 +17,7 @@ describe('Auth Service', () => {
             create: jest.fn(() => Promise.resolve(true))
         };
         facebookProvider = {};
-        authService = new AuthService(usersService, facebookProvider);
+        authService = new AuthService(usersService);
     });
 
     describe('validateUser', () => {

@@ -12,6 +12,8 @@ declare namespace NodeJS {
         FACEBOOK_GRAPH_API_VERSION: string;
         FACEBOOK_ID: string;
         FACEBOOK_SECRET: string;
+        GOOGLE_ID: string;
+        GOOGLE_SECRET: string;
         VERBOSE: string;
     }
 }

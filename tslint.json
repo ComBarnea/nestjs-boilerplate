@@ -55,7 +55,8 @@
             true,
             "check-module"
         ],
-        "no-namespace": false
+        "no-namespace": false,
+        "no-shadowed-variable": false
     },
     "rulesDirectory": []
 }

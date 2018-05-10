@@ -21,6 +21,7 @@ export async function bootstrap() {
     server.use(bodyParser.urlencoded({ extended: false }));
 
     const app = await NestFactory.create(ApplicationModule, server, {});
+    app.enableCors();
     /**
      * Prefix our api with a version prefix,
      * will help with breaking changes for future releases

@@ -1,8 +1,7 @@
 import * as jwt from 'jsonwebtoken';
 import * as moment from 'moment';
-import { Component, HttpException, Inject } from '@nestjs/common';
+import { Component, forwardRef, HttpException, Inject } from '@nestjs/common';
 import { UserModel } from '../user/user.provider';
-import { FacebookDto } from './auth.dto';
 
 import {
     IAuthProviderLogin, IGetUserWithPasswordResetToken, IResetPasswordRequest,
@@ -10,8 +9,10 @@ import {
 } from './auth.types';
 import { ICreateUser, IUpdateUser } from '../user/user.types';
 import { UsersService } from '../user/user.service';
-import { FacebookProvider } from './authProviders/facebook.provider';
 import { generateGUID } from '../utils';
+import { AuthProviderEnums } from './auth.enums';
+import { FacebookProvider } from './authProviders/facebook.provider';
+import { GoogleProvider } from './authProviders/google.provider';
 
 @Component()
 export class AuthService {
@@ -20,13 +21,13 @@ export class AuthService {
 
     constructor(
         @Inject(UsersService) private usersService: UsersService,
-        @Inject(FacebookProvider) private facebookProvider: FacebookProvider,
+        @Inject(forwardRef(() => FacebookProvider)) private facebookProvider: FacebookProvider,
+        @Inject(forwardRef(() => GoogleProvider)) private googleProvider: GoogleProvider,
     ) {
 
     }
 
-    private async createToken(user: UserModel) {
-
+    public async createToken(user: UserModel) {
         const data = {
             email: user.email,
             firstName: user.firstName,
@@ -34,6 +35,7 @@ export class AuthService {
             _id: user._id,
             profilePicture: user.profilePicture
         };
+
         const token = jwt.sign(data, process.env.SECRET, { expiresIn: this.tokenExp });
 
         return {
@@ -114,7 +116,11 @@ export class AuthService {
                 });
             }
 
-            foundUser = await this.usersService.updateOne({_id: foundUser._id}, updateData);
+            await this.usersService.updateOne({_id: foundUser._id}, updateData);
+
+            foundUser = await this.usersService.findUserById({
+                _id: foundUser._id
+            });
         } else {
             providerLoginData.user[providerLoginData.providerType as string] = providerLoginData.providerId;
             providerLoginData.user.tokens = [
@@ -127,25 +133,7 @@ export class AuthService {
             foundUser = await this.usersService.create(providerLoginData.user);
         }
 
-        return this.createToken(foundUser);
-    }
-
-    /**
-     * handle all types of facebook login/sign up
-     * @param {FacebookDto} facebookData
-     * @return {Promise<Promise<{access_token: string}>>}
-     */
-    public async facebook(facebookData: FacebookDto) {
-        let accessToken: string;
-        if (!facebookData.sdk) {
-            accessToken = await this.facebookProvider.getAccessToken(facebookData.code, facebookData.clientId, facebookData.redirectUri);
-        } else {
-            accessToken = facebookData.accessToken;
-        }
-
-        const providerData = await this.facebookProvider.authentication(accessToken);
-
-        return this.providerLogin(providerData);
+        return foundUser;
     }
 
     public async createPasswordResetRequest(resetRequestData: IResetPasswordRequest) {
@@ -192,4 +180,15 @@ export class AuthService {
 
         return 'Request successful.';
     }
+
+    public async getProviderRedirectUri<T>(providerType: AuthProviderEnums, requestData?: T) {
+        if (!this[`${providerType}Provider`]) throw new HttpException('Unknown provider.', 409);
+        return await this[`${providerType}Provider`].requestProviderRedirectUri(requestData);
+    }
+
+    public async providerLoginIn<T>(providerType: AuthProviderEnums, requestData?: T) {
+        if (!this[`${providerType}Provider`]) throw new HttpException('Unknown provider.', 409);
+        return this[`${providerType}Provider`].requestProviderLogIn(requestData);
+    }
+
 }

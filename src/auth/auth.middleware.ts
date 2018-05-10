@@ -24,7 +24,7 @@ export class IsAuthenticated implements NestMiddleware {
 
                 try {
                     await this.authService.validateUser(decoded._id);
-                } catch {
+                } catch (e) {
                     throw new HttpException('Authentication Error', HttpStatus.UNAUTHORIZED);
                 }
 

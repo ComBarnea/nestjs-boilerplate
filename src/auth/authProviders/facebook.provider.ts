@@ -1,63 +1,99 @@
-import { Component } from '@nestjs/common';
+import { Component, forwardRef, Inject } from '@nestjs/common';
+import { use } from 'passport';
+import { wrappedRequest } from '../../utils';
+import * as FacebookTokenStrategy from 'passport-facebook-token';
+
 import { AuthProviderEnums } from '../auth.enums';
 import { IAuthProviderLogin } from '../auth.types';
-import { ICreateUser } from '../../user/user.types';
-import { wrappedRequest } from '../../utils';
+import { AuthService } from '../auth.service';
+import { IFacebookConfig } from './config/facebook.provider.config';
+import { SERVER_CONFIG } from '../../app.constants';
+import { facebookConfig } from './config/facebook.provider.config';
 
 @Component()
 export class FacebookProvider {
-    /**
-     * holding accessToken we can now grab our facebook user
-     * @param {string} accessToken
-     * @return {Promise<IAuthProviderLogin>}
-     * @private
-     */
-    async authentication(accessToken: string): Promise<IAuthProviderLogin> {
-        const fields          = ['id', 'email', 'first_name', 'last_name', 'link', 'name', 'gender', 'age_range', 'birthday', 'location'];
-        const graphApiUrl     = `https://graph.facebook.com/v${process.env.FACEBOOK_GRAPH_API_VERSION}/me?fields=${fields.join(',')}`;
-
-        // Step 2. Retrieve profile information about the current user.
-        const params = {
-            access_token: accessToken
-        };
-
-        // Step 1. Exchange authorization code for access token.
-        const {data: profile} = await wrappedRequest({url: graphApiUrl, qs: params, json: true});
-
-        const user: ICreateUser = {
-            profilePicture: `https://graph.facebook.com/${profile.id}/picture?type=large`,
-            firstName: profile.first_name,
-            lastName: profile.last_name,
-            email: (profile.email && profile.email.toLowerCase()) || `${profile.id}@null.com`,  // fake mail assignment
-            gender: profile.gender || null
-        };
-
-        return { providerType: AuthProviderEnums.FACEBOOK, user, providerId: profile.id, providerToken: accessToken};
+    url: string;
+    fbConfig: IFacebookConfig;
+    constructor(
+        @Inject(forwardRef(() => AuthService)) private readonly authService: AuthService
+    ) {
+        this.fbConfig = facebookConfig;
+        this.init();
+        this.url = `${SERVER_CONFIG.protocol}://${SERVER_CONFIG.origin}:${SERVER_CONFIG.port}`;
     }
 
-    /**
-     * with no facebook sdk on client side
-     * we need to convert code into access_token
-     * @param {string} code
-     * @param {string} clientId
-     * @param {string} redirectUri
-     * @return {Promise<string>}
-     * @private
-     */
-    async getAccessToken(code: string, clientId: string, redirectUri: string): Promise<string> {
-        const accessTokenUrl  = 'https://graph.facebook.com/v2.5/oauth/access_token';
+    private init(): void {
+        use('facebook', new FacebookTokenStrategy({
+            clientID: this.fbConfig.client_id,
+            clientSecret: this.fbConfig.client_secret,
+            profileFields: ['id', 'email', 'first_name', 'last_name', 'link', 'gender', 'age_range', 'birthday', 'location']
+        }, async (accessToken: string, refreshToken: string, profileData: any, done: Function) => {
+            const profile = profileData._json;
 
-        const params = {
-            code,
-            client_id: clientId,
-            redirect_uri: redirectUri,
-            client_secret: process.env.FACEBOOK_SECRET,
-            scope: 'user_friends'
+            try {
+                const providerLoginData: IAuthProviderLogin = {
+                    user: {
+                        profilePicture: `https://graph.facebook.com/${profile.id}/picture?type=large`,
+                        firstName: profile.first_name,
+                        lastName: profile.last_name,
+                        email: (profile.email && profile.email.toLowerCase()) || `${profile.id}@null.com`,  // fake mail assignment
+                        gender: profile.gender || null
+                    },
+                    providerType: AuthProviderEnums.FACEBOOK,
+                    providerId: profile.id,
+                    providerToken: accessToken
+                };
+
+                const user = await this.authService.providerLogin(providerLoginData);
+
+                done(null, user);
+            } catch (err) {
+                done(err, null);
+            }
+        }));
+    }
+
+    async requestProviderRedirectUri(): Promise<{redirect_uri: string}> {
+        const queryParams: string[] = [
+            `client_id=${this.fbConfig.client_id}`,
+            `redirect_uri=${this.fbConfig.oauth_redirect_uri}`,
+            `state=${this.fbConfig.state}`
+        ];
+        const redirect_uri: string = `${this.fbConfig.login_dialog_uri}?${queryParams.join('&')}`;
+
+        return {
+            redirect_uri
+        };
+    }
+
+    async requestProviderLogIn(data: {code: string}): Promise<any> {
+        const code: string = data.code;
+        let response;
+        const queryParams = {
+            client_id: `${this.fbConfig.client_id}`,
+            redirect_uri: `${this.fbConfig.oauth_redirect_uri}`,
+            client_secret: `${this.fbConfig.client_secret}`,
+            code
         };
 
-        // Step 1. Exchange authorization code for access token.
-        const {data: accessToken} = await wrappedRequest({url: accessTokenUrl, qs: params, json: true});
+        response = await wrappedRequest({
+            method: 'GET',
+            url: `${this.fbConfig.access_token_uri}`,
+            qs: queryParams,
+            json: true
+        });
 
-        return accessToken.access_token;
+        const { access_token } = response.data;
+
+        response = await wrappedRequest({
+            method: 'POST',
+            url: `${this.url}/v1/auth/facebook/token`,
+            form: {
+                access_token
+            },
+            json: true
+        });
+
+        return response.data.data;
     }
 }

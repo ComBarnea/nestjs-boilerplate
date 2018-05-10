@@ -1,11 +1,14 @@
-import { Controller, Post, Body, Query, Get } from '@nestjs/common';
+import { Controller, Post, Body, Query, Get, Req } from '@nestjs/common';
 import {
-    FacebookDto, GetUserWithPasswordResetTokenDto, GoogleDto, LoginDto, PasswordResetDto, PasswordResetRequestDto,
+    FacebookDto, GetUserWithPasswordResetTokenDto, GoogleDto, IToken, LoginDto, PasswordResetDto,
+    PasswordResetRequestDto,
     RegisterDto
 } from './auth.dto';
 
 import { AuthService } from './auth.service';
 import { ApiOperation } from '@nestjs/swagger';
+import { IServerRequest } from '../types/main.types';
+import { AuthProviderEnums } from './auth.enums';
 
 @Controller('auth')
 export class AuthController {
@@ -16,53 +19,47 @@ export class AuthController {
     }
 
     @Post('/register')
-    public async register(@Body() body: RegisterDto) {
-        return await this.authService.register(body);
+    async requestJsonWebTokenAfterLocalSignUp(@Req() req: IServerRequest): Promise<IToken> {
+        return await this.authService.createToken(req.user);
     }
 
     @Post('/login')
-    public async login(@Body() body: LoginDto) {
-        return await this.authService.login(body.email, body.password);
+    async requestJsonWebTokenAfterLocalSignIn(@Req() req: IServerRequest): Promise<IToken> {
+        return await this.authService.createToken(req.user);
     }
 
-    @Post('/facebook')
-    @ApiOperation({
-        title: 'Facebook login and sign up.',
-        description: `Can be with sdk=true and than accessToken is required.
-        Without sdk code, clientId, and redirectUri are required.`
-    })
-    public async facebook(@Body() body: FacebookDto) {
-        return await this.authService.facebook(body);
+    @Get('/facebook/uri')
+    async requestFacebookRedirectUrl(): Promise<{redirect_uri: string}> {
+        const ans =  await this.authService.getProviderRedirectUri<any>(AuthProviderEnums.FACEBOOK, {});
+
+        return ans;
     }
 
-    @Get('/facebook/callback')
-    @ApiOperation({
-        title: 'Facebook login and sign up.',
-        description: `Can be with sdk=true and than accessToken is required.
-        Without sdk code, clientId, and redirectUri are required.`
-    })
-    public async facebookCallback(@Query() query: FacebookDto) {
-        return await this.authService.facebook(query);
+    @Post('/facebook/login')
+    async facebookSignIn(@Req() req: IServerRequest): Promise<IToken> {
+        return await this.authService.providerLoginIn<any>(AuthProviderEnums.FACEBOOK, {code: req.body.code});
     }
 
-    @Post('/google')
-    @ApiOperation({
-        title: 'Google login and sign up.',
-        description: `Can be with sdk=true and than accessToken is required.
-        Without sdk code, clientId, and redirectUri are required.`
-    })
-    public async google(@Body() body: GoogleDto) {
-        return await this.authService.facebook(body);
+    @Post('/facebook/token')
+    async requestJsonWebTokenAfterFacebookSignIn(@Req() req: IServerRequest): Promise<IToken> {
+        return await this.authService.createToken(req.user);
     }
 
-    @Get('/google/callback')
-    @ApiOperation({
-        title: 'Google login and sign up.',
-        description: `Can be with sdk=true and than accessToken is required.
-        Without sdk code, clientId, and redirectUri are required.`
-    })
-    public async googleCallback(@Query() query: GoogleDto) {
-        return await this.authService.facebook(query);
+    @Get('/google/uri')
+    async requestGoogleRedirectUrl(): Promise<{redirect_uri: string}> {
+        const ans =  await this.authService.getProviderRedirectUri<any>(AuthProviderEnums.GOOGLE, {});
+
+        return ans;
+    }
+
+    @Post('/google/login')
+    async googleSignIn(@Req() req: IServerRequest): Promise<IToken> {
+        return await this.authService.providerLoginIn<any>(AuthProviderEnums.GOOGLE, {code: req.body.code});
+    }
+
+    @Post('/google/token')
+    async requestJsonWebTokenAfterGoogleSignIn(@Req() req: IServerRequest): Promise<IToken> {
+        return await this.authService.createToken(req.user);
     }
 
     @Post('/password-reset-request')

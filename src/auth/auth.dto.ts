@@ -63,3 +63,7 @@ export class PasswordResetDto {
     @ApiModelPropertyOptional()
     readonly newPassword: string;
 }
+
+export interface IToken {
+    access_token: string;
+}
