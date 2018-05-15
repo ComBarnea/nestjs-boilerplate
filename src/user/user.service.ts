@@ -1,17 +1,16 @@
 import { InjectModel } from '@nestjs/mongoose';
-import { Component, HttpException } from '@nestjs/common';
+import { Injectable, HttpException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as moment from 'moment';
 
 import { Model } from 'mongoose';
-import { UserSchema } from './schemas/user.schema';
 import { UserModel } from './user.provider';
 import { ICreateUser, IFindUserByEmail, IFindUserById, IFindUserByProvider, IFindUserByResetToken } from './user.types';
 
-@Component()
+@Injectable()
 export class UsersService {
 
-    constructor(@InjectModel(UserSchema) private userModel: Model<UserModel>) {
+    constructor(@InjectModel('User') private userModel: Model<UserModel>) {
 
     }
 

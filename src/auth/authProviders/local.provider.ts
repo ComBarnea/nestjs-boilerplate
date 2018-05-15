@@ -1,4 +1,4 @@
-import { Component, Inject, HttpException } from '@nestjs/common';
+import { Inject, HttpException, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { use } from 'passport';
 import { Strategy } from 'passport-local';
@@ -6,7 +6,7 @@ import { Strategy } from 'passport-local';
 import { UserModel } from '../../user/user.provider';
 import { UsersService } from '../../user/user.service';
 
-@Component()
+@Injectable()
 export class LocalStrategy {
     constructor(
         @Inject(UsersService) private usersService: UsersService) {

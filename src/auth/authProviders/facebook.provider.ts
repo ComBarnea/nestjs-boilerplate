@@ -1,4 +1,4 @@
-import { Component, forwardRef, Inject } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { use } from 'passport';
 import { wrappedRequest } from '../../utils';
 import * as FacebookTokenStrategy from 'passport-facebook-token';
@@ -7,10 +7,10 @@ import { AuthProviderEnums } from '../auth.enums';
 import { IAuthProviderLogin } from '../auth.types';
 import { AuthService } from '../auth.service';
 import { IFacebookConfig } from './config/facebook.provider.config';
-import { SERVER_CONFIG } from '../../app.constants';
+import { ROUTE_PREFIX, SERVER_CONFIG } from '../../app.constants';
 import { facebookConfig } from './config/facebook.provider.config';
 
-@Component()
+@Injectable()
 export class FacebookProvider {
     url: string;
     fbConfig: IFacebookConfig;
@@ -87,7 +87,7 @@ export class FacebookProvider {
 
         response = await wrappedRequest({
             method: 'POST',
-            url: `${this.url}/v1/auth/facebook/token`,
+            url: `${this.url}${ROUTE_PREFIX}/auth/facebook/token`,
             form: {
                 access_token
             },

@@ -20,12 +20,12 @@ export class AuthController {
 
     @Post('/register')
     async requestJsonWebTokenAfterLocalSignUp(@Req() req: IServerRequest): Promise<IToken> {
-        return await this.authService.createToken(req.user);
+        return await this.authService.createToken(req.user, true);
     }
 
     @Post('/login')
     async requestJsonWebTokenAfterLocalSignIn(@Req() req: IServerRequest): Promise<IToken> {
-        return await this.authService.createToken(req.user);
+        return await this.authService.createToken(req.user, true);
     }
 
     @Get('/facebook/uri')
@@ -42,7 +42,7 @@ export class AuthController {
 
     @Post('/facebook/token')
     async requestJsonWebTokenAfterFacebookSignIn(@Req() req: IServerRequest): Promise<IToken> {
-        return await this.authService.createToken(req.user);
+        return await this.authService.createToken(req.user, true);
     }
 
     @Get('/google/uri')
@@ -59,7 +59,7 @@ export class AuthController {
 
     @Post('/google/token')
     async requestJsonWebTokenAfterGoogleSignIn(@Req() req: IServerRequest): Promise<IToken> {
-        return await this.authService.createToken(req.user);
+        return await this.authService.createToken(req.user, true);
     }
 
     @Post('/password-reset-request')

@@ -11,6 +11,6 @@ import { UsersModule } from './user/user.module';
         UsersModule,
         AuthModule
     ],
-    components: []
+    providers: []
 })
 export class ApplicationModule {}

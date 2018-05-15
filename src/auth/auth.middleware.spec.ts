@@ -3,10 +3,10 @@ jest.mock('jsonwebtoken');
 import * as cors from 'cors';
 import * as jwt from 'jsonwebtoken';
 
-import { AddFacebookCORS, IsAuthenticated } from './auth.middleware';
+import { /*AddFacebookCORS,*/ IsAuthenticated } from './auth.middleware';
 
 describe('Auth Middleware', () => {
-    describe('AddFacebookCORS', () => {
+    /*describe('AddFacebookCORS', () => {
         const addFacebookCORS = new AddFacebookCORS();
 
         it('should define `resolve` method', async () => {
@@ -20,7 +20,7 @@ describe('Auth Middleware', () => {
                 expect(cors).toHaveBeenCalledTimes(1);
             }
         });
-    });
+    });*/
 
     describe('IsAuthenticated', () => {
         let isAuthenticated: IsAuthenticated;

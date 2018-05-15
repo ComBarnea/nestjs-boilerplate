@@ -1,22 +1,25 @@
-import { Interceptor, NestInterceptor, ExecutionContext, HttpException } from '@nestjs/common';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/do';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/observable/throw';
+import { NestInterceptor, ExecutionContext, HttpException, Injectable } from '@nestjs/common';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
-@Interceptor()
+@Injectable()
 export class ExitInterceptor implements NestInterceptor {
-    intercept(dataOrRequest, context: ExecutionContext, stream$: Observable<any>): Observable<any> {
+    intercept(context: ExecutionContext, stream$: Observable<any>): Observable<any> {
 
-        return stream$.map((data) => {
-            return {data};
-        }).catch((e) => {
-            if (e instanceof  HttpException) {
-                return Observable.throw(e);
-            } else {
-                return Observable.throw(new HttpException('Internal Error', 500));
-            }
-        });
+        return stream$.
+        pipe(
+            map((data) => {
+                return {data};
+            })
+        )
+        .pipe(
+            catchError((e) => {
+                if (e instanceof  HttpException) {
+                    return throwError(e);
+                } else {
+                    return throwError(new HttpException('Internal Error', 500));
+                }
+            })
+        );
     }
 }

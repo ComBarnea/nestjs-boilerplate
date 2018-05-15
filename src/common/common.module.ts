@@ -1,11 +1,12 @@
 import {
     Module,
     NestModule,
-    MiddlewaresConsumer,
+    MiddlewareConsumer,
     RequestMethod,
     Logger
 } from '@nestjs/common';
 import { LoggerMiddleware } from './middlewares';
+import { loggerMiddlewareRoutes } from './middlewares/logger.middleware';
 
 /**
  * Common module which contains useful utilities.
@@ -15,10 +16,10 @@ import { LoggerMiddleware } from './middlewares';
  */
 @Module({})
 export class CommonModule implements NestModule {
-    public configure(consumer: MiddlewaresConsumer): void {
+    public configure(consumer: MiddlewareConsumer): void {
         consumer
             .apply(LoggerMiddleware)
             .with(new Logger('Request', true))
-            .forRoutes({ path: '/**', method: RequestMethod.ALL });
+            .forRoutes(loggerMiddlewareRoutes);
     }
 }

@@ -1,4 +1,4 @@
-import { Component, forwardRef, Inject } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { use } from 'passport';
 import { wrappedRequest } from '../../utils';
 import * as GoogleTokenStrategy from 'passport-google-plus-token';
@@ -6,12 +6,12 @@ import * as GoogleTokenStrategy from 'passport-google-plus-token';
 import { AuthProviderEnums } from '../auth.enums';
 import { IAuthProviderLogin } from '../auth.types';
 import { AuthService } from '../auth.service';
-import { SERVER_CONFIG } from '../../app.constants';
+import { ROUTE_PREFIX, SERVER_CONFIG } from '../../app.constants';
 import { googleConfig } from './config/google.provider.config';
 import { get, post, Response } from 'request';
 import { IGoogleConfig } from './config/google.provider.config';
 
-@Component()
+@Injectable()
 export class GoogleProvider {
     url: string;
     googleConfig: IGoogleConfig;
@@ -87,7 +87,7 @@ export class GoogleProvider {
 
         response = await wrappedRequest({
             method: 'POST',
-            url: `${this.url}/v1/auth/google/token`,
+            url: `${this.url}${ROUTE_PREFIX}/auth/google/token`,
             form: {
                 access_token
             },

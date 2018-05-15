@@ -1,6 +1,6 @@
 import * as jwt from 'jsonwebtoken';
 import * as moment from 'moment';
-import { Component, forwardRef, HttpException, Inject } from '@nestjs/common';
+import { Injectable, forwardRef, HttpException, Inject } from '@nestjs/common';
 import { UserModel } from '../user/user.provider';
 
 import {
@@ -14,7 +14,7 @@ import { AuthProviderEnums } from './auth.enums';
 import { FacebookProvider } from './authProviders/facebook.provider';
 import { GoogleProvider } from './authProviders/google.provider';
 
-@Component()
+@Injectable()
 export class AuthService {
     private tokenExp = '2 days';
     private passwordRequestTokenExpHours = 48;
@@ -27,7 +27,7 @@ export class AuthService {
 
     }
 
-    public async createToken(user: UserModel) {
+    public async createToken(user: UserModel, passUser?: boolean) {
         const data = {
             email: user.email,
             firstName: user.firstName,
@@ -38,41 +38,17 @@ export class AuthService {
 
         const token = jwt.sign(data, process.env.SECRET, { expiresIn: this.tokenExp });
 
-        return {
+        const answer: any = {
             access_token: token
         };
+
+        if (passUser) answer.user = user;
+
+        return answer;
     }
 
     public async validateUser(userId: string) {
         return await this.usersService.validateUser(userId);
-    }
-
-    // TODO: how about we validate the password?
-    public async login(email, password) {
-        let foundUser: UserModel;
-        if (!email) throw new HttpException('Email is required', 422);
-        if (!password) throw new HttpException('Password is required', 422);
-
-        foundUser = await this.usersService.findUserForLogin({ email });
-        if (!foundUser) throw new HttpException('User not found', 401);
-
-        const isMatch = await foundUser.comparePassword(password);
-        if (!isMatch) throw new HttpException('Wrong password.', 401);
-
-        foundUser = await this.usersService.findUserByEmail({ email });
-        if (!foundUser) throw new HttpException('User not found', 401);
-
-        return this.createToken(foundUser);
-    }
-
-    public async register(userData: ICreateUser) {
-        let foundUser: UserModel;
-        foundUser = await this.usersService.findUserForLogin({ email: userData.email});
-        if (foundUser) throw new HttpException('User already found', 409);
-
-        foundUser = await this.usersService.create(userData);
-
-        return this.createToken(foundUser);
     }
 
     /**
@@ -190,5 +166,4 @@ export class AuthService {
         if (!this[`${providerType}Provider`]) throw new HttpException('Unknown provider.', 409);
         return this[`${providerType}Provider`].requestProviderLogIn(requestData);
     }
-
 }

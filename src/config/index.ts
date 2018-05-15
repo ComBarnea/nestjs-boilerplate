@@ -1,5 +1,3 @@
-import { normalize, join } from 'path';
-
 interface IEnvironmentConfig {
     rootPath: string;
     db: string;

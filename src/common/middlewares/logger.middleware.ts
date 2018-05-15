@@ -1,7 +1,6 @@
-import { Logger } from '@nestjs/common';
+import { Injectable, Logger, NestMiddleware, RequestMethod } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 import chalk from 'chalk';
-import { Middleware, NestMiddleware, ExpressMiddleware } from '@nestjs/common';
 
 /**
  * Request logging middleware.
@@ -9,9 +8,9 @@ import { Middleware, NestMiddleware, ExpressMiddleware } from '@nestjs/common';
  * @class LoggerMiddleware
  * @implements {NestMiddleware}
  */
-@Middleware()
+@Injectable()
 export class LoggerMiddleware implements NestMiddleware {
-    private template = '[%%] %% [%%]';
+    private template: string = '[%%] %% [%%]';
 
     private getMessage(...args: string[]) {
         return this.template
@@ -19,7 +18,7 @@ export class LoggerMiddleware implements NestMiddleware {
             .reduce((aggregate, chunk, i) => aggregate + chunk + (args[i] || ''), '');
     }
 
-    resolve(logger: Logger): ExpressMiddleware {
+    resolve(logger: Logger) {
         return (req: Request, res: Response, next: NextFunction) => {
             const message = this.getMessage(
                 chalk.white(req.method),
@@ -32,3 +31,8 @@ export class LoggerMiddleware implements NestMiddleware {
         };
     }
 }
+
+export const loggerMiddlewareRoutes: any = {
+    path: '/**',
+    method: RequestMethod.ALL
+};
