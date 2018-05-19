@@ -8,14 +8,19 @@ import { GoogleProvider } from './authProviders/google.provider';
 import { authenticate } from 'passport';
 import { LocalStrategy } from './authProviders/local.provider';
 import { ROUTE_PREFIX } from '../app.constants';
+import { RolesGuard } from '../authorization/auth.guard';
+import { RepositoryModule } from '../repository/repository.module';
+import { AuthorizationModule } from '../authorization/authorization.module';
 
 @Module({
     imports: [
+        RepositoryModule,
+        AuthorizationModule,
         forwardRef(() => UsersModule)
     ],
-    providers: [AuthService, IsAuthenticated, FacebookProvider, GoogleProvider, LocalStrategy],
     controllers: [AuthController],
-    exports: [IsAuthenticated]
+    providers: [AuthService, IsAuthenticated, FacebookProvider, GoogleProvider, LocalStrategy],
+    exports: [IsAuthenticated, AuthService]
 })
 export class AuthModule implements NestModule {
     constructor() {

@@ -1,17 +1,21 @@
-import { InjectModel } from '@nestjs/mongoose';
-import { Injectable, HttpException } from '@nestjs/common';
+import { Injectable, HttpException, Inject } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as moment from 'moment';
 
 import { Model } from 'mongoose';
 import { UserModel } from './user.provider';
 import { ICreateUser, IFindUserByEmail, IFindUserById, IFindUserByProvider, IFindUserByResetToken } from './user.types';
+import { APP_TOKENS } from '../app.constants';
+import { RepositoryService } from '../repository/repository.service';
 
 @Injectable()
 export class UsersService {
+    userModel: Model<UserModel>;
 
-    constructor(@InjectModel('User') private userModel: Model<UserModel>) {
-
+    constructor(
+        @Inject('Context') private ctx: any,
+        @Inject(RepositoryService) private repositoryService: RepositoryService) {
+        this.userModel = this.repositoryService.getModel(APP_TOKENS.userModel);
     }
 
     public async create(userData: ICreateUser): Promise<UserModel> {

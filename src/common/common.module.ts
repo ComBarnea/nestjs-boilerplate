@@ -7,6 +7,14 @@ import {
 } from '@nestjs/common';
 import { LoggerMiddleware } from './middlewares';
 import { loggerMiddlewareRoutes } from './middlewares/logger.middleware';
+import * as httpContext from 'express-http-context';
+
+const contextFactory = {
+    provide: 'Context',
+    useFactory: () => {
+        return httpContext;
+    }
+};
 
 /**
  * Common module which contains useful utilities.
@@ -14,7 +22,10 @@ import { loggerMiddlewareRoutes } from './middlewares/logger.middleware';
  * @class CommonModule
  * @implements {NestModule}
  */
-@Module({})
+@Module({
+    providers: [contextFactory],
+    exports: [contextFactory]
+})
 export class CommonModule implements NestModule {
     public configure(consumer: MiddlewareConsumer): void {
         consumer

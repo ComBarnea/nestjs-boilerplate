@@ -1,29 +1,33 @@
 import * as mongoose from 'mongoose';
 import * as bcrypt from 'bcrypt';
+import { PartialAuthorization } from '../../authorization/schemas/authorization.partial.schema';
 
 export const UserSchema = new mongoose.Schema({
     email: { type: String, unique: true },
     facebook: String,
+    google: String,
     tokens: Array,
     firstName: String,
     lastName: String,
     gender: String,
     password: {
         type: String,
-        select: false
+        select: process.verbose_api ? true : false
     },
     resetToken: {
         type: String,
-        select: false
+        select: process.verbose_api ? true : false
     },
     resetTokenValidUntil: {
         type: Date,
-        select: false
+        select: process.verbose_api ? true : false
     },
-    profilePicture: String
+    profilePicture: String,
+    ...PartialAuthorization
 }, { timestamps: true });
 
 UserSchema.methods.comparePassword = comparePassword;
+
 
 /**
  * Helper method for validating user's password.

@@ -25,3 +25,9 @@ export function generateGUID() {
         return v.toString(16);
     });
 }
+
+export function syncTimeOut(time) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, time);
+    });
+}

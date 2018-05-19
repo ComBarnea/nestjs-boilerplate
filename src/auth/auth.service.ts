@@ -13,6 +13,8 @@ import { generateGUID } from '../utils';
 import { AuthProviderEnums } from './auth.enums';
 import { FacebookProvider } from './authProviders/facebook.provider';
 import { GoogleProvider } from './authProviders/google.provider';
+import { RepositoryService } from '../repository/repository.service';
+import { APP_TOKENS } from '../app.constants';
 
 @Injectable()
 export class AuthService {
@@ -21,10 +23,10 @@ export class AuthService {
 
     constructor(
         @Inject(UsersService) private usersService: UsersService,
+        @Inject(RepositoryService) private repositoryService: RepositoryService,
         @Inject(forwardRef(() => FacebookProvider)) private facebookProvider: FacebookProvider,
         @Inject(forwardRef(() => GoogleProvider)) private googleProvider: GoogleProvider,
     ) {
-
     }
 
     public async createToken(user: UserModel, passUser?: boolean) {

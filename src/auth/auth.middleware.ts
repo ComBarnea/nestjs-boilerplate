@@ -2,6 +2,7 @@ import { NestMiddleware, HttpException, HttpStatus, Injectable, Inject } from '@
 import { NextFunction, Request, Response } from 'express';
 import * as cors from 'cors';
 import * as jwt from 'jsonwebtoken';
+import * as httpContext from 'express-http-context';
 import { UsersService } from '../user/user.service';
 
 @Injectable()
@@ -16,6 +17,7 @@ export class IsAuthenticated implements NestMiddleware {
 
                 try {
                     decoded = jwt.verify(token, process.env.SECRET);
+
                 } catch (e) {
                     if (e.name === 'TokenExpiredError') throw new HttpException('Expired token', HttpStatus.UNAUTHORIZED);
                     throw new HttpException('Authentication Error', HttpStatus.UNAUTHORIZED);
@@ -26,6 +28,9 @@ export class IsAuthenticated implements NestMiddleware {
                 } catch (e) {
                     throw new HttpException('Authentication Error', HttpStatus.UNAUTHORIZED);
                 }
+
+                req.user = decoded;
+                httpContext.set('user', decoded);
 
                 return next();
             } else {

@@ -1,5 +1,6 @@
 import * as env from 'dotenv';
 env.config({ path: '.env.example' });
+import * as httpContext from 'express-http-context';
 
 if (process.env.DOCKER_ENV === 'true' && process.env.DB_URL.includes('localhost')) {
     process.env.DB_URL = process.env.DB_URL.replace('localhost', 'docker.for.mac.host.internal');
@@ -19,7 +20,7 @@ export async function bootstrap() {
     const server = express();
     server.use(bodyParser.json());
     server.use(bodyParser.urlencoded({ extended: false }));
-
+    server.use(httpContext.middleware);
     const app = await NestFactory.create(ApplicationModule, server, {});
     app.enableCors();
     /**

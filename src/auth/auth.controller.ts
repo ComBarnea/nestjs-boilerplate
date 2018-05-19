@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Query, Get, Req } from '@nestjs/common';
+import { Controller, Post, Body, Query, Get, Req, UseInterceptors, ReflectMetadata } from '@nestjs/common';
 import {
     FacebookDto, GetUserWithPasswordResetTokenDto, GoogleDto, IToken, LoginDto, PasswordResetDto,
     PasswordResetRequestDto,
@@ -9,7 +9,10 @@ import { AuthService } from './auth.service';
 import { ApiOperation } from '@nestjs/swagger';
 import { IServerRequest } from '../types/main.types';
 import { AuthProviderEnums } from './auth.enums';
+import { AuthCreateInterceptor } from '../authorization/auth.interceptors';
+import { APP_REFLECTOR_TOKENS, APP_TOKENS } from '../app.constants';
 
+@UseInterceptors(AuthCreateInterceptor)
 @Controller('auth')
 export class AuthController {
     constructor(
@@ -18,6 +21,10 @@ export class AuthController {
 
     }
 
+    @ReflectMetadata(APP_REFLECTOR_TOKENS.modelType, APP_TOKENS.userModel)
+    @ReflectMetadata(APP_REFLECTOR_TOKENS.befPipe, (answer) => {
+        return answer.data.user;
+    })
     @Post('/register')
     async requestJsonWebTokenAfterLocalSignUp(@Req() req: IServerRequest): Promise<IToken> {
         return await this.authService.createToken(req.user, true);

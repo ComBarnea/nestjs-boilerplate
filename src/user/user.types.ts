@@ -1,11 +1,12 @@
 import { AuthProviderEnums } from '../auth/auth.enums';
+import { IPartialGroupAuth } from '../auth/auth.types';
 
 export interface AuthToken {
     accessToken: string;
     provider: AuthProviderEnums;
 }
 
-export interface IUser {
+export interface IUser extends IPartialGroupAuth{
     readonly email: string;
     readonly facebook: string;
     readonly tokens: AuthToken[];
