@@ -1,6 +1,5 @@
 export const PartialAuthorization = {
-    authS: {
-        select: process.verbose_api ? true : false,
+    authorization: {
         type: []
     }
 };

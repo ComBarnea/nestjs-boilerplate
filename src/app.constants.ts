@@ -18,8 +18,17 @@ export const APP_REFLECTOR_TOKENS = {
     authPermission: 'authPermission'
 };
 
+export const addConfigToEnv = () => {
+    process.PORT = SERVER_CONFIG.port;
+    process.env.DB_URL = SERVER_CONFIG.db;
+    process.env.SECRET = SERVER_CONFIG.jwtSecret;
+    process.verbose = SERVER_CONFIG.verbose;
+    process.verbose_api = SERVER_CONFIG.verboseApi;
+    process.env.FACEBOOK_ID = SERVER_CONFIG.facebookId;
+    process.env.FACEBOOK_SECRET = SERVER_CONFIG.facebookSecret;
+    process.env.GOOGLE_ID = SERVER_CONFIG.googleId;
+    process.env.GOOGLE_SECRET = SERVER_CONFIG.googleSecret;
+};
+
 export const PORT: any = process.env.PORT || 3000;
 export const ROUTE_PREFIX = '/v1';
-
-process.verbose = process.env.VERBOSE === 'TRUE';
-process.verbose_api = process.env.VERBOSE_API === 'TRUE';

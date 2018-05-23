@@ -3,6 +3,7 @@ declare namespace NodeJS {
         env: ProcessEnv;
         verbose: boolean;
         verbose_api: boolean;
+        PORT: number;
     }
 
     export interface ProcessEnv {

@@ -4,17 +4,24 @@ import * as moment from 'moment';
 
 import { Model } from 'mongoose';
 import { UserModel } from './user.provider';
-import { ICreateUser, IFindUserByEmail, IFindUserById, IFindUserByProvider, IFindUserByResetToken } from './user.types';
+import {
+    ICreateUser, IFindUserByEmail, IFindUserById, IFindUserByProvider, IFindUserByResetToken,
+    IFindUsers
+} from './user.types';
 import { APP_TOKENS } from '../app.constants';
 import { RepositoryService } from '../repository/repository.service';
+import { AuthorizationRoot } from '../authorization/authorization.root';
+import { AuthorizationService } from '../authorization/authorization.service';
 
 @Injectable()
-export class UsersService {
+export class UsersService extends AuthorizationRoot {
     userModel: Model<UserModel>;
 
     constructor(
-        @Inject('Context') private ctx: any,
+        @Inject(AuthorizationService) private authorizationService: AuthorizationService,
         @Inject(RepositoryService) private repositoryService: RepositoryService) {
+        super();
+
         this.userModel = this.repositoryService.getModel(APP_TOKENS.userModel);
     }
 
@@ -39,7 +46,7 @@ export class UsersService {
      * @return {Promise<UserModel>}
      */
     public async validateUser(userId: string): Promise<boolean> {
-        const foundUser = await this.userModel.findById(userId, '_id');
+        const foundUser = await this.userModel.findOne({_id: userId}, '_id');
         if (!foundUser) throw {err: 'Invalid user.'};
 
         return !!foundUser;
@@ -52,6 +59,10 @@ export class UsersService {
         };
 
         return await this.userModel.findOne(findConditions, ['_id', 'password']);
+    }
+
+    public async findUsers(userData: IFindUsers): Promise<UserModel[]> {
+        return await this.userModel.find({});
     }
 
     public async findUserById(userData: IFindUserById): Promise<UserModel> {
@@ -95,6 +106,9 @@ export class UsersService {
 
     public async updateOne(userData: IFindUserById, updateData): Promise<UserModel> {
         if (!userData._id) throw new HttpException('Find condition are required.', 422);
+
+        let foundUser = await this.findUserById(userData);
+        foundUser = await this.authorizationService.validateResource(foundUser);
 
         if (updateData.hasOwnProperty('password')) {
             updateData.password = String(updateData.password);

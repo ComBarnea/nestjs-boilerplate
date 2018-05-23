@@ -10,3 +10,7 @@ export interface IMiddleWareRoute {
     path: string;
     method: RequestMethod;
 }
+
+export interface IGetResources {
+
+}

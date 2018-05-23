@@ -6,12 +6,7 @@ import { map, catchError } from 'rxjs/operators';
 export class ExitInterceptor implements NestInterceptor {
     intercept(context: ExecutionContext, stream$: Observable<any>): Observable<any> {
 
-        return stream$.
-        pipe(
-            map((data) => {
-                return {data};
-            })
-        )
+        return stream$
         .pipe(
             catchError((e) => {
                 if (e instanceof  HttpException) {
@@ -19,6 +14,11 @@ export class ExitInterceptor implements NestInterceptor {
                 } else {
                     return throwError(new HttpException('Internal Error', 500));
                 }
+            })
+        )
+        .pipe(
+            map((data) => {
+                return {data};
             })
         );
     }

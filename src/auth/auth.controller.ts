@@ -9,8 +9,9 @@ import { AuthService } from './auth.service';
 import { ApiOperation } from '@nestjs/swagger';
 import { IServerRequest } from '../types/main.types';
 import { AuthProviderEnums } from './auth.enums';
-import { AuthCreateInterceptor } from '../authorization/auth.interceptors';
+import { AuthCreateInterceptor } from '../authorization/authorization.interceptors';
 import { APP_REFLECTOR_TOKENS, APP_TOKENS } from '../app.constants';
+import { AuthRoles, BefPipe, ModelType } from '../authorization/decorators/autorization.decorators';
 
 @UseInterceptors(AuthCreateInterceptor)
 @Controller('auth')
@@ -21,8 +22,9 @@ export class AuthController {
 
     }
 
-    @ReflectMetadata(APP_REFLECTOR_TOKENS.modelType, APP_TOKENS.userModel)
-    @ReflectMetadata(APP_REFLECTOR_TOKENS.befPipe, (answer) => {
+    @ModelType(APP_TOKENS.userModel)
+    @AuthRoles(['everyone'])
+    @BefPipe((answer) => {
         return answer.data.user;
     })
     @Post('/register')
@@ -54,9 +56,7 @@ export class AuthController {
 
     @Get('/google/uri')
     async requestGoogleRedirectUrl(): Promise<{redirect_uri: string}> {
-        const ans =  await this.authService.getProviderRedirectUri<any>(AuthProviderEnums.GOOGLE, {});
-
-        return ans;
+        return await this.authService.getProviderRedirectUri<any>(AuthProviderEnums.GOOGLE, {});
     }
 
     @Post('/google/login')

@@ -1,6 +1,5 @@
 import { Injectable, NestInterceptor, ExecutionContext, Inject, ForwardReference, forwardRef } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
 import { Reflector } from '@nestjs/core';
 import { RepositoryService } from '../../repository/repository.service';
 
@@ -22,9 +21,15 @@ export class AuthValidationInterceptor implements NestInterceptor {
         call$: Observable<any>,
     ) {
         const authPermissions: string[] = this.reflector.get<string[]>(APP_REFLECTOR_TOKENS.authPermission, context.getHandler());
+        const authRules: string[] = this.reflector.get<string[]>(APP_REFLECTOR_TOKENS.authRoles, context.getHandler());
         const request: IServerRequest = context.switchToHttp().getRequest();
+
         const user = request.user;
-        const foundGroups = await this.authorizationService.getUserGroups(user._id);
+
+        const foundGroups = user ? await this.authorizationService.getUserGroups(user._id) : [];
+
+        // TODO: add fine grain control over this
+        foundGroups.push('everyone');
 
         if (authPermissions && authPermissions.length) {
             const partialAuthQuery = await this.authorizationService.constructAuthQueryPart(foundGroups, authPermissions.map((a) => {
@@ -36,11 +41,6 @@ export class AuthValidationInterceptor implements NestInterceptor {
             httpContext.set(APP_TOKENS.partialAuthQuery, partialAuthQuery);
         }
 
-        return call$.pipe(
-            map(async (ans) => {
-
-                return ans;
-            }),
-        );
+        return call$;
     }
 }

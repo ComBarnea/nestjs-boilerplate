@@ -1,6 +1,9 @@
 import * as env from 'dotenv';
 env.config({ path: '.env.example' });
 import * as httpContext from 'express-http-context';
+import { addConfigToEnv, ROUTE_PREFIX } from './app.constants';
+
+addConfigToEnv();
 
 if (process.env.DOCKER_ENV === 'true' && process.env.DB_URL.includes('localhost')) {
     process.env.DB_URL = process.env.DB_URL.replace('localhost', 'docker.for.mac.host.internal');
@@ -10,7 +13,6 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 
 import { NestFactory } from '@nestjs/core';
-import { PORT, ROUTE_PREFIX } from './app.constants';
 import { ApplicationModule } from './app.module';
 import { initDocumentation } from './documentation';
 import { ExitInterceptor } from './interceptors/app.exit.interceptor';
@@ -37,9 +39,9 @@ export async function bootstrap() {
         endpoint: '/docs'
     });
 
-    await app.listen(PORT);
+    await app.listen(process.PORT);
 
-    console.log(`Server started on port: ${PORT}`);
+    console.log(`Server started on port: ${process.PORT}`);
 
     return app;
 }

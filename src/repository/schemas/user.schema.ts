@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import { PartialAuthorization } from '../../authorization/schemas/authorization.partial.schema';
+import { PartialAuthorization } from './authorization.partial.schema';
 
 export const UserSchema = new mongoose.Schema({
     email: { type: String, unique: true },
@@ -27,7 +27,6 @@ export const UserSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 UserSchema.methods.comparePassword = comparePassword;
-
 
 /**
  * Helper method for validating user's password.

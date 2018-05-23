@@ -1,7 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { APP_TOKENS } from '../app.constants';
 import { RepositoryService } from '../repository/repository.service';
-import { inspect } from 'util';
+import { IPartialGroupAuth } from '../auth/auth.types';
+import * as _ from 'lodash';
 const MAX_USER_GROUPS = 3;
 
 @Injectable()
@@ -9,6 +10,7 @@ export class AuthorizationService {
     groupsModel: any;
 
     constructor(
+        @Inject('Context') private ctx: any,
         @Inject(RepositoryService) private repositoryService: RepositoryService,
     ) {
         this.groupsModel = this.repositoryService.getModel(APP_TOKENS.authGroupsModel);
@@ -86,8 +88,8 @@ export class AuthorizationService {
         groups.forEach((g) => {
             permissionNeeded.forEach((p) => {
                 const newPart = this.getBasicAuthPart();
-                newPart[`authS.groupId`] = g;
-                newPart[`authS.rules.${[p.name]}`] = true;
+                newPart[`authorization.groupId`] = g;
+                newPart[`authorization.rules.${[p.name]}`] = true;
 
                 queryPartialAuth.$or.push(newPart);
             });
@@ -110,5 +112,50 @@ export class AuthorizationService {
             }],
             name: null
         };
+    }
+
+    public async validateResource(resource: IPartialGroupAuth, keepAuth?: boolean): Promise<any> {
+        if (!resource) return;
+        if (!resource.authorization) return;
+
+        const authorizationQuery = this.ctx.get(APP_TOKENS.partialAuthQuery);
+
+        let foundPermission = false;
+
+        if (authorizationQuery && authorizationQuery.$or && authorizationQuery.$or.length) {
+            authorizationQuery.$or.forEach((singlePerReq) => {
+                const singlePerRequest = _.cloneDeep(singlePerReq);
+
+                Object.keys(singlePerRequest).forEach((key) => {
+                    if (key.includes('authorization.')) {
+                        singlePerRequest[key.replace('authorization.', '')] = singlePerRequest[key];
+
+                        delete singlePerRequest[key];
+                    }
+                });
+
+                resource.authorization.forEach((singlePer) => {
+                    if (singlePer.groupId === singlePerRequest.groupId) {
+                        Object.keys(singlePerRequest).forEach((key) => {
+                           if (key.includes('rules')) {
+                               const ruleKey = key.replace('rules.', '');
+
+                               if (singlePer.rules[ruleKey] === singlePerRequest[key]) foundPermission = true;
+                           }
+                        });
+                    }
+                });
+            });
+        }
+
+        if (!foundPermission)  throw new HttpException('Authorization not found.', 401);
+
+        // TODO: TEMP solution until proper DTO's
+        if (!keepAuth)  {
+            (resource as any).set('authorization', null);
+            delete (resource as any)._doc.authorization;
+        }
+
+        return resource;
     }
 }

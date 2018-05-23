@@ -1,6 +1,6 @@
 import { forwardRef, MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { UsersModule } from '../user/user.module';
-import { IsAuthenticated, EnableCORS } from './auth.middleware';
+import { IsAuthenticated, EnableCORS, JWTParse } from './auth.middleware';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { FacebookProvider } from './authProviders/facebook.provider';
@@ -8,7 +8,6 @@ import { GoogleProvider } from './authProviders/google.provider';
 import { authenticate } from 'passport';
 import { LocalStrategy } from './authProviders/local.provider';
 import { ROUTE_PREFIX } from '../app.constants';
-import { RolesGuard } from '../authorization/auth.guard';
 import { RepositoryModule } from '../repository/repository.module';
 import { AuthorizationModule } from '../authorization/authorization.module';
 
@@ -19,7 +18,7 @@ import { AuthorizationModule } from '../authorization/authorization.module';
         forwardRef(() => UsersModule)
     ],
     controllers: [AuthController],
-    providers: [AuthService, IsAuthenticated, FacebookProvider, GoogleProvider, LocalStrategy],
+    providers: [AuthService, IsAuthenticated, FacebookProvider, GoogleProvider, LocalStrategy, JWTParse],
     exports: [IsAuthenticated, AuthService]
 })
 export class AuthModule implements NestModule {

@@ -25,7 +25,8 @@ export class UsersModule implements NestModule {
 
     public configure(consumer: MiddlewareConsumer) {
         const IsAuthenticatedPathArr = [
-            {path: `${ROUTE_PREFIX}/${UserRoutesToken.root}/${UserRoutesToken.singleUser}`, method: RequestMethod.GET}
+            {path: `${ROUTE_PREFIX}/${UserRoutesToken.root}/${UserRoutesToken.singleUser}`, method: RequestMethod.GET},
+            {path: `${ROUTE_PREFIX}/${UserRoutesToken.root}`, method: RequestMethod.GET}
         ];
 
         IsAuthenticatedPathArr.forEach((pathObj: any) => {

@@ -1,5 +1,5 @@
 import { forwardRef, MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
-import { AuthCreateInterceptor, AuthValidationInterceptor } from './auth.interceptors';
+import { AuthCreateInterceptor, AuthValidationInterceptor } from './authorization.interceptors';
 import { AuthorizationService } from './authorization.service';
 import { RepositoryModule } from '../repository/repository.module';
 import { CommonModule } from '../common/common.module';

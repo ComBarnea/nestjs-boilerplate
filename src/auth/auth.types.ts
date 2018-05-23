@@ -1,6 +1,6 @@
 import { AuthProviderEnums } from './auth.enums';
 import { ICreateUser } from '../user/user.types';
-import { ISingleAuth } from '../authorization/schemas/authorization.partial.schema';
+import { ISingleAuth } from '../repository/schemas/authorization.partial.schema';
 
 export interface IAuthProviderLogin {
     providerType: AuthProviderEnums;
@@ -23,5 +23,5 @@ export interface IResetUserPassword {
 }
 
 export interface IPartialGroupAuth {
-    authS: ISingleAuth[];
+    authorization: ISingleAuth[];
 }

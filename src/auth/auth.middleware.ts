@@ -11,12 +11,26 @@ export class IsAuthenticated implements NestMiddleware {
 
     resolve() {
         return async (req: Request, res: Response, next: NextFunction) => {
+            const user = httpContext.get('user');
+            if (!user) throw new HttpException('Authentication Error', HttpStatus.UNAUTHORIZED);
+
+            return next();
+        };
+    }
+}
+
+@Injectable()
+export class JWTParse implements NestMiddleware {
+    constructor(@Inject(UsersService) private usersService: UsersService) {}
+
+    resolve() {
+        return async (req: Request, res: Response, next: NextFunction) => {
             if (req.headers.authorization && (req.headers.authorization as string).split(' ')[0] === 'Bearer') {
                 const token = (req.headers.authorization as string).split(' ')[1];
                 let decoded: any;
 
                 try {
-                    decoded = jwt.verify(token, process.env.SECRET);
+                    decoded = jwt.verify(token, process.env.SECRET, process.env.NODE_ENV === 'dev' ? {ignoreExpiration: true} : {ignoreExpiration: false});
 
                 } catch (e) {
                     if (e.name === 'TokenExpiredError') throw new HttpException('Expired token', HttpStatus.UNAUTHORIZED);
@@ -34,7 +48,7 @@ export class IsAuthenticated implements NestMiddleware {
 
                 return next();
             } else {
-                throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+                return next();
             }
         };
     }
