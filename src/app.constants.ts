@@ -8,14 +8,22 @@ export const SERVER_CONFIG: IEnvironmentConfig = Config[env];
 export const APP_TOKENS = {
     userModel: 'User',
     authGroupsModel: 'AuthGroups',
-    partialAuthQuery: 'partialAuthQuery'
+    partialAuthQuery: 'partialAuthQuery',
+    partialAuthParent: 'partialAuthParent',
 };
 
 export const APP_REFLECTOR_TOKENS = {
     modelType: 'modelType',
     befPipe: 'befPipe',
     authRoles: 'authRoles',
-    authPermission: 'authPermission'
+    authPermission: 'authPermission',
+    authParentPipe: 'authParentPipe'
+};
+
+export const APP_REQUEST_LOCATION = {
+    body: 'body',
+    query: 'query',
+    params: 'params'
 };
 
 export const addConfigToEnv = () => {

@@ -22,6 +22,7 @@ export class AuthValidationInterceptor implements NestInterceptor {
     ) {
         const authPermissions: string[] = this.reflector.get<string[]>(APP_REFLECTOR_TOKENS.authPermission, context.getHandler());
         const authRules: string[] = this.reflector.get<string[]>(APP_REFLECTOR_TOKENS.authRoles, context.getHandler());
+        const authParentPipe: [string, Function] = this.reflector.get<[string, Function]>(APP_REFLECTOR_TOKENS.authParentPipe, context.getHandler());
         const request: IServerRequest = context.switchToHttp().getRequest();
 
         const user = request.user;
@@ -39,6 +40,10 @@ export class AuthValidationInterceptor implements NestInterceptor {
             }));
 
             httpContext.set(APP_TOKENS.partialAuthQuery, partialAuthQuery);
+        }
+
+        if (authParentPipe && authParentPipe.length) {
+            httpContext.set(APP_TOKENS.partialAuthParent, authParentPipe[1](request[authParentPipe[0]]));
         }
 
         return call$;

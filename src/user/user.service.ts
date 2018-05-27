@@ -1,6 +1,5 @@
 import { Injectable, HttpException, Inject } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import * as moment from 'moment';
 
 import { Model } from 'mongoose';
 import { UserModel } from './user.provider';
@@ -17,9 +16,8 @@ import { AuthorizationService } from '../authorization/authorization.service';
 export class UsersService extends AuthorizationRoot {
     userModel: Model<UserModel>;
 
-    constructor(
-        @Inject(AuthorizationService) private authorizationService: AuthorizationService,
-        @Inject(RepositoryService) private repositoryService: RepositoryService) {
+    constructor(@Inject(AuthorizationService) private authorizationService: AuthorizationService,
+                @Inject(RepositoryService) private repositoryService: RepositoryService) {
         super();
 
         this.userModel = this.repositoryService.getModel(APP_TOKENS.userModel);
@@ -46,7 +44,12 @@ export class UsersService extends AuthorizationRoot {
      * @return {Promise<UserModel>}
      */
     public async validateUser(userId: string): Promise<boolean> {
-        const foundUser = await this.userModel.findOne({_id: userId}, '_id');
+        const query = {
+            ...this.getBasicQuery(),
+            _id: userId
+        };
+
+        const foundUser = await this.userModel.findOne(query, '_id');
         if (!foundUser) throw {err: 'Invalid user.'};
 
         return !!foundUser;
@@ -55,21 +58,23 @@ export class UsersService extends AuthorizationRoot {
     public async findUserForLogin(userData: IFindUserByEmail): Promise<UserModel> {
         if (!userData.email) throw new HttpException('Find condition are required.', 422);
         const findConditions = {
-            email: userData.email
+            email: userData.email,
+            ...this.getBasicQuery()
         };
 
         return await this.userModel.findOne(findConditions, ['_id', 'password']);
     }
 
     public async findUsers(userData: IFindUsers): Promise<UserModel[]> {
-        return await this.userModel.find({});
+        return await this.userModel.find(this.getBasicQuery());
     }
 
     public async findUserById(userData: IFindUserById): Promise<UserModel> {
         if (!userData._id) throw new HttpException('Find condition are required.', 422);
 
         const findConditions = {
-            _id: userData._id
+            _id: userData._id,
+            ...this.getBasicQuery()
         };
 
         return await this.userModel.findOne(findConditions);
@@ -78,7 +83,8 @@ export class UsersService extends AuthorizationRoot {
     public async findUserByEmail(userData: IFindUserByEmail): Promise<UserModel> {
         if (!userData.email) throw new HttpException('Find condition are required.', 422);
         const findConditions = {
-            email: userData.email
+            email: userData.email,
+            ...this.getBasicQuery()
         };
 
         return await this.userModel.findOne(findConditions);
@@ -88,7 +94,8 @@ export class UsersService extends AuthorizationRoot {
         if (!userData.providerId || !userData.providerType) throw new HttpException('Find condition are required.', 422);
 
         const findConditions = {
-            [userData.providerType]: userData.providerId
+            [userData.providerType]: userData.providerId,
+            ...this.getBasicQuery()
         };
 
         return await this.userModel.findOne(findConditions);
@@ -98,7 +105,8 @@ export class UsersService extends AuthorizationRoot {
         if (!userData.resetToken) throw new HttpException('Find condition are required.', 422);
 
         const findConditions = {
-            resetToken: userData.resetToken
+            resetToken: userData.resetToken,
+            ...this.getBasicQuery()
         };
 
         return await this.userModel.findOne(findConditions);
@@ -118,12 +126,19 @@ export class UsersService extends AuthorizationRoot {
         }
 
         const findConditions = {
-            _id: userData._id
+            _id: userData._id,
+            ...this.getBasicQuery()
         };
 
         await this.userModel.update(findConditions, updateData);
 
         return await this.findUserById(findConditions);
+    }
+
+    public getBasicQuery() {
+        return {
+            deletedAt: null
+        } as any;
     }
 }
 

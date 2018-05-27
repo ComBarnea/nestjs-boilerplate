@@ -3,6 +3,8 @@ import { APP_TOKENS } from '../app.constants';
 import { RepositoryService } from '../repository/repository.service';
 import { IPartialGroupAuth } from '../auth/auth.types';
 import * as _ from 'lodash';
+import { IAuthParentPipe } from './decorators/autorization.decorators';
+
 const MAX_USER_GROUPS = 3;
 
 @Injectable()
@@ -98,6 +100,21 @@ export class AuthorizationService {
         return queryPartialAuth;
     }
 
+    public async constructAuthQueryPartByUser(authPermissions, userId: string) {
+        const foundGroups = await this.getUserGroups(userId);
+
+        // TODO: add fine grain control over this
+        foundGroups.push('everyone');
+
+        const partialAuthQuery = await this.constructAuthQueryPart(foundGroups, authPermissions.map((a) => {
+            return {
+                name: a
+            };
+        }));
+
+        return partialAuthQuery;
+    }
+
     private getBasicAuthPart() {
         return {
 
@@ -114,48 +131,102 @@ export class AuthorizationService {
         };
     }
 
-    public async validateResource(resource: IPartialGroupAuth, keepAuth?: boolean): Promise<any> {
+    public async preValidateResource(partialAuthParentOverRide?: IAuthParentPipe, authorizationOverRide?: any[]): Promise<any> {
+        let partialAuthParent: IAuthParentPipe = this.ctx.get(APP_TOKENS.partialAuthParent);
+
+        if (partialAuthParentOverRide) partialAuthParent = partialAuthParentOverRide;
+
+        if (!partialAuthParent) return;
+        if (!partialAuthParent.parentId || !partialAuthParent.parentType) throw new HttpException('Authorization not found.', 401);
+
+        const parentModel: any = this.repositoryService.getModel(partialAuthParent.parentType);
+        const foundParent = await parentModel.findOne({_id: partialAuthParent.parentId}, `authorization`);
+
+        if (!foundParent) throw new HttpException('Authorization not found.', 401);
+
+        return await this.validateResource(foundParent, authorizationOverRide);
+    }
+
+    public async validateResource(resource: IPartialGroupAuth, authorizationOverRide?: any[], keepAuth?: boolean): Promise<any> {
         if (!resource) return;
         if (!resource.authorization) return;
 
-        const authorizationQuery = this.ctx.get(APP_TOKENS.partialAuthQuery);
+        let authorizationQuery = this.ctx.get(APP_TOKENS.partialAuthQuery);
 
-        let foundPermission = false;
-
-        if (authorizationQuery && authorizationQuery.$or && authorizationQuery.$or.length) {
-            authorizationQuery.$or.forEach((singlePerReq) => {
-                const singlePerRequest = _.cloneDeep(singlePerReq);
-
-                Object.keys(singlePerRequest).forEach((key) => {
-                    if (key.includes('authorization.')) {
-                        singlePerRequest[key.replace('authorization.', '')] = singlePerRequest[key];
-
-                        delete singlePerRequest[key];
-                    }
-                });
-
-                resource.authorization.forEach((singlePer) => {
-                    if (singlePer.groupId === singlePerRequest.groupId) {
-                        Object.keys(singlePerRequest).forEach((key) => {
-                           if (key.includes('rules')) {
-                               const ruleKey = key.replace('rules.', '');
-
-                               if (singlePer.rules[ruleKey] === singlePerRequest[key]) foundPermission = true;
-                           }
-                        });
-                    }
-                });
-            });
+        if (authorizationOverRide && authorizationOverRide.length) {
+            authorizationQuery = {$or: authorizationOverRide};
         }
+
+        const foundPermission = validateResourceWithAuthorizationGroupList(resource, authorizationQuery.$or);
 
         if (!foundPermission)  throw new HttpException('Authorization not found.', 401);
 
         // TODO: TEMP solution until proper DTO's
         if (!keepAuth)  {
-            (resource as any).set('authorization', null);
-            delete (resource as any)._doc.authorization;
+            resource = this.cleanAuth(resource) as any;
         }
 
         return resource;
     }
+
+    public cleanAuth(data: IPartialGroupAuth | IPartialGroupAuth[]) {
+        if (_.isArray(data)) {
+            data.forEach((singleDoc) => {
+                applyDocMutation(singleDoc);
+            });
+
+            return data;
+        } else {
+            applyDocMutation(data);
+
+            return data;
+        }
+
+        function applyDocMutation(doc) {
+            if ((doc as any).set) (doc as any).set('authorization', null);
+            if ((doc as any)._doc) delete (doc as any)._doc.authorization;
+
+            delete doc.authorization;
+        }
+    }
+
+    public extendQueryWithAuthorization(query: IPartialGroupAuth): any {
+        const authorizationQuery = this.ctx.get(APP_TOKENS.partialAuthQuery);
+        const cloneQuery = _.cloneDeep(query);
+        _.assign(cloneQuery, authorizationQuery);
+
+        return cloneQuery;
+    }
+}
+
+function validateResourceWithAuthorizationGroupList(resource: IPartialGroupAuth, authorizationList: any[]): boolean {
+    let foundPermission = false;
+
+    if (authorizationList && authorizationList.length) {
+        authorizationList.forEach((singlePerReq) => {
+            const singlePerRequest = _.cloneDeep(singlePerReq);
+
+            Object.keys(singlePerRequest).forEach((key) => {
+                if (key.includes('authorization.')) {
+                    singlePerRequest[key.replace('authorization.', '')] = singlePerRequest[key];
+
+                    delete singlePerRequest[key];
+                }
+            });
+
+            resource.authorization.forEach((singlePer) => {
+                if (singlePer.groupId === singlePerRequest.groupId) {
+                    Object.keys(singlePerRequest).forEach((key) => {
+                        if (key.includes('rules')) {
+                            const ruleKey = key.replace('rules.', '');
+
+                            if (singlePer.rules[ruleKey] === singlePerRequest[key]) foundPermission = true;
+                        }
+                    });
+                }
+            });
+        });
+    }
+
+    return foundPermission;
 }

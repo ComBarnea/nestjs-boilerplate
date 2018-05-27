@@ -1,6 +1,7 @@
 import * as mongoose from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { PartialAuthorization } from './authorization.partial.schema';
+import { PartialDelete } from './delete.partial.schema';
 
 export const UserSchema = new mongoose.Schema({
     email: { type: String, unique: true },
@@ -23,7 +24,8 @@ export const UserSchema = new mongoose.Schema({
         select: process.verbose_api ? true : false
     },
     profilePicture: String,
-    ...PartialAuthorization
+    ...PartialAuthorization,
+    ...PartialDelete
 }, { timestamps: true });
 
 UserSchema.methods.comparePassword = comparePassword;

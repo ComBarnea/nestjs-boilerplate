@@ -19,7 +19,7 @@ import { AuthorizationModule } from '../authorization/authorization.module';
     ],
     controllers: [AuthController],
     providers: [AuthService, IsAuthenticated, FacebookProvider, GoogleProvider, LocalStrategy, JWTParse],
-    exports: [IsAuthenticated, AuthService]
+    exports: [IsAuthenticated, AuthService, JWTParse]
 })
 export class AuthModule implements NestModule {
     constructor() {
